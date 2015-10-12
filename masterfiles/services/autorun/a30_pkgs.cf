@@ -30,6 +30,7 @@ files:
 
     "/etc/yum.repos.d/epel.repo"
     handle          => "a30h_pkg_epel",
+    create          => "true",
     perms           => mog("0644","root","root"),
     copy_from       => local_dcp("$(s_dir)/epel.repo.txt"),
     classes         => if_repaired("a30c_fixed_epel"); 

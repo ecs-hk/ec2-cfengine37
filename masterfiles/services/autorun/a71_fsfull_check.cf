@@ -29,6 +29,7 @@ files:
 
     "/etc/cron.hourly/90-fs-full-check"
     handle          => "a71h_fsfull_cronjob",
+    create          => "true",
     perms           => mog("755","root","root"),
     copy_from       => local_dcp("$(s_dir)/$(s_script)"),
     classes         => if_repaired("a71c_fsfull_script_fixed");

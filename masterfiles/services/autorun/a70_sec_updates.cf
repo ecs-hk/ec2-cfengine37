@@ -29,6 +29,7 @@ files:
 
     "/etc/yum/yum-cron-security.conf"
     handle          => "a70h_yumsec_conf",
+    create          => "false",
     perms           => mog("644","root","root"),
     copy_from       => local_dcp("$(s_dir)/$(s_conf)"),
     classes         => if_repaired("a70c_yumsec_fixed");

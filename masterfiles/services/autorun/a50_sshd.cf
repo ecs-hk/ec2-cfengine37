@@ -38,6 +38,7 @@ files:
 
     "/etc/ssh/sshd_config"
     handle          => "a50h_sshd_conf",
+    create          => "false",
     depends_on      => {"a50h_sshd_banner"},
     perms           => mog("644","root","root"),
     copy_from       => local_dcp("$(s_dir)/$(s_conf)"),
