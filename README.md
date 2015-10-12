@@ -14,7 +14,7 @@ https://cfengine.com/product/community/
 
 ### One-time install and setup
 
-Install the CFEngine package and clone this git repository. Then:
+On the hub system, install the CFEngine package and clone this git repository. Then:
 
 ```
 # cp -r ./ec2-cfengine37/masterfiles/* /var/cfengine/masterfiles
@@ -36,11 +36,21 @@ Always, **always** validate your JSON after editing it, or else CFEngine will si
 
 You will also need to add a rule to your AWS Security Group to allow in TCP 5308 from CFEngine agents to the CFEngine hub.
 
+### Bootstrap to yourself
+
+This bootstrapping step will put the hub under CFEngine management, just like all managed agents.
+
+```
+# cf-agent --bootstrap 172.31.21.122
+```
+
+Use the IP address of your CFEngine hub instead of the above.
+
 ## Deploy to CFEngine agent
 
-### One-time install and setup
+### One-time install, then bootstrap to the hub
 
-Install the CFEngine package. Then:
+On each agent system, install the CFEngine package. Then:
 
 ```
 # cf-agent --bootstrap 172.31.21.122
