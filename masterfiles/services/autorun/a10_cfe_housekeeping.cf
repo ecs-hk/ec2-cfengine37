@@ -29,6 +29,6 @@ commands:
 
     a10c_deleted_files::
     "$(a05_vars.log_notice)"
-    args => "Deleted CFE-generated duplicates from cron directories";
+    args => "Deleted CFE-generated duplicates from various directories";
 
 }
