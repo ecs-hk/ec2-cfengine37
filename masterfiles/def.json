@@ -15,7 +15,7 @@
     },
     "vars": {
         "acl": [
-            "172.31.21.122/20"
+            "172.31.0.0/16"
         ],
         "agentfacility": "LOG_LOCAL3",
         "domain": "ec2.local"
