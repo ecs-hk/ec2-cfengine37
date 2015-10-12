@@ -1,0 +1,52 @@
+###############################################################################
+# Ensure certain services are not running.
+###############################################################################
+
+bundle agent a80_stop_procs
+{
+
+meta:
+
+    "tags" slist => { "autorun" };
+
+methods:
+
+    amzn_2015_09::
+    "a80nfs" usebundle => a80_nfs_run;
+
+}
+
+bundle agent a80_nfs_run
+{
+
+processes:
+
+    "\brpcbind\b"
+    restart_class => "a80c_rpcbind_dead";
+
+    "\brpc\.statd\b"
+    restart_class => "a80c_nfslock_dead";
+
+commands:
+
+    !a80c_rpcbind_dead::
+    "/etc/init.d/rpcbind stop";
+
+    "/sbin/chkconfig rpcbind off"
+    classes     => if_repaired("a80c_rpcbind_stopped");
+
+    !a80c_nfslock_dead::
+    "/etc/init.d/nfslock stop";
+
+    "/sbin/chkconfig nfslock off"
+    classes     => if_repaired("a80c_nfslock_stopped");
+
+    a80c_rpcbind_stopped::
+    "$(a05_vars.log_warning)"
+    args => "Shut off and disabled the rpcbind service";
+
+    a80c_nfslock_stopped::
+    "$(a05_vars.log_warning)"
+    args => "Shut off and disabled the nfslock service";
+
+}

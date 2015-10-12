@@ -1,0 +1,21 @@
+{
+    "pkgs": [
+        "epel-release",
+        "util-linux",
+        "ntp",
+        "at",
+        "lsof",
+        "mailx",
+        "git",
+        "gawk",
+        "mlocate",
+        "openldap-clients",
+        "rsyslog",
+        "rsyslog-mysql",
+        "tcpdump",
+        "iotop",
+        "iperf",
+        "bash-completion",
+	"yum-cron-security"
+    ]
+}

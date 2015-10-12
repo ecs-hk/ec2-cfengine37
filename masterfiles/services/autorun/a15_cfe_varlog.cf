@@ -1,0 +1,49 @@
+###############################################################################
+# Set up CFEngine log file and enable log rotation.
+###############################################################################
+
+bundle agent a15_cfe_varlog
+{
+
+meta:
+
+    "tags" slist => { "autorun" };
+
+methods:
+
+    amzn_2015_09::
+    "a15logr" usebundle => a15_cfe_varlog_run;
+
+}
+
+bundle agent a15_cfe_varlog_run
+{
+
+vars:
+
+    "s_dir" string  => "$(a05_vars.text)";
+
+    "s_conf" string => "logrotate.d.conf.txt";
+
+files:
+
+    "/var/log/cfengine"
+    handle          => "a15h_log",
+    create          => "true",
+    perms           => mog("644","root","root");
+
+    "/etc/logrotate.d/03-cfengine"
+    handle          => "a15h_logrotate_conf",
+    depends_on      => {"a15h_log"},
+    create          => "true",
+    perms           => mog("644","root","root"),
+    copy_from       => local_dcp("$(s_dir)/$(s_conf)"),
+    classes         => if_repaired("a15c_logrotate_fixed");
+
+commands:
+
+    a15c_logrotate_fixed::
+    "$(a05_vars.log_notice)"
+    args => "Set up CFEngine /var/log file and logrotate conf";
+
+}

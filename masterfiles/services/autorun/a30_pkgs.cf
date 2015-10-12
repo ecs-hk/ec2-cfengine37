@@ -1,0 +1,71 @@
+# -------------------------------------------------------------------------- #
+# Configure yum repo for EPEL, and install desired packages (which are 
+# stored in a JSON file).
+# -------------------------------------------------------------------------- #
+
+bundle agent a30_pkgs
+{
+
+meta:
+
+    "tags" slist => { "autorun" };
+
+methods:
+
+    amzn_2015_09::
+    "a30confrun" usebundle => a30_conf_run;
+
+    "a30pkgrun" usebundle => a30_pkg_run;
+
+}
+
+bundle agent a30_conf_run
+{
+
+vars:
+
+    "s_dir" string  => "$(a05_vars.text)";
+
+files:
+
+    "/etc/yum.repos.d/epel.repo"
+    handle          => "a30h_pkg_epel",
+    perms           => mog("0644","root","root"),
+    copy_from       => local_dcp("$(s_dir)/epel.repo.txt"),
+    classes         => if_repaired("a30c_fixed_epel"); 
+
+commands:
+
+    a30c_fixed_epel::
+    "$(a05_vars.log_notice)"
+    args => "Repaired EPEL yum configuration";
+
+}
+
+bundle agent a30_pkg_run
+{
+
+vars:
+
+    "s_dir" string  => "$(a05_vars.json)";
+
+    "json_data" data => readjson("$(s_dir)/pkgs.json", 50000);
+
+    "pkg_list" slist => getvalues("json_data[pkgs]");
+
+packages:
+
+    "$(pkg_list)"
+    handle          => "a30h_pkg_install",
+    depends_on      => { "a30h_pkg_epel" },
+    policy          => "present",
+    package_module  => yum,
+    classes         => if_repaired("a30c_fixed_pkgs");
+
+commands:
+
+    a30c_fixed_pkgs::
+    "$(a05_vars.log_notice)"
+    args => "Installed baseline packages";
+
+}

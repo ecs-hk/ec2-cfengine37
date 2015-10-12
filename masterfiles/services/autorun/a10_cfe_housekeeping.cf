@@ -1,0 +1,34 @@
+# -------------------------------------------------------------------------- #
+# Clean up any CFEngine-generated files from directories that could cause
+# unpleasant side-effects.
+# -------------------------------------------------------------------------- #
+
+bundle agent a10_cfe_housekeeping
+{
+
+meta:
+
+    "tags" slist => { "autorun" };
+
+vars:
+
+    "globs" slist => {
+        "/etc/{logrotate.d,rsyslog.d}/*.{cfsaved,cf-before-edit}",
+        "/etc/cron.*/*.{cfsaved,cf-before-edit}"
+       };
+
+    "cruft" slist  => findfiles("$(globs)");
+
+files:
+
+    "$(cruft)"
+    delete  => tidy,
+    classes => if_repaired("a10c_deleted_files");
+
+commands:
+
+    a10c_deleted_files::
+    "$(a05_vars.log_notice)"
+    args => "Deleted CFE-generated duplicates from cron directories";
+
+}

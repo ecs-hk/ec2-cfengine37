@@ -1,0 +1,12 @@
+# Managed by CFEngine
+/var/log/cfengine {
+    rotate 7
+    compress
+    notifempty
+    weekly
+    size 10M
+    create 0644 root root
+    postrotate
+        /bin/kill -HUP `cat /var/run/syslogd.pid 2> /dev/null` 2> /dev/null || true
+    endscript
+}

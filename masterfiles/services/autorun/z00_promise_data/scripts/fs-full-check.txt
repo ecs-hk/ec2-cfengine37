@@ -1,0 +1,93 @@
+#!/bin/bash
+
+# Managed by CFEngine
+
+# ------------------------------------------------------------------------- #
+#			VARIABLE DEFINITIONS
+# ------------------------------------------------------------------------- #
+
+PATH=/bin:/usr/bin
+
+readonly _upper_limit=95
+readonly _lockfile=/tmp/fs-full.lock
+_overfull=0
+
+# ------------------------------------------------------------------------- #
+#			FUNCTIONS
+# ------------------------------------------------------------------------- #
+
+confirm_gawk_installed() {
+        which gawk >/dev/null 2>&1
+        if [ ${?} -ne 0 ] ; then
+                printf '%s\n'                                           \
+                        'Please install gawk so I can monitor filesystems'
+                exit 1
+        fi
+}
+
+check_filesystem_sizes() {
+	local _i
+	for _i in ${_fs_percents} ; do
+		if [ ${_i%\%} -ge ${_upper_limit} ] ; then
+			_overfull=1
+			break
+		fi
+	done
+}
+
+alert_to_stdout() {
+	if [ -e "${_lockfile}" ] ; then
+		return
+	fi
+
+	printf '%s\n\n%s\n\n'						\
+		'ALERT: filesystem space (or inodes) running out'	\
+		'--- space usage ---'
+
+	df -P | gawk '{printf "%-12s %s [ %s ]\n", $5,$1,$6}'
+
+	printf '\n\n%s\n\n'						\
+		'--- inodes usage ---'
+
+	df -Pi | gawk '{printf "%-12s %s [ %s ]\n", $5,$1,$6}'
+}
+
+alert_to_logger() {
+	if [ -e "${_lockfile}" ] ; then
+		return
+	fi
+
+	logger -p local3.alert 'ALERT: filesystem(s) getting full'
+}
+
+cleanup() {
+	rm -f "${_lockfile}"
+}
+
+# ------------------------------------------------------------------------- #
+#			MAIN LOGIC
+# ------------------------------------------------------------------------- #
+
+confirm_gawk_installed
+
+# First check filesystem space
+#
+_fs_percents="$(df -P | gawk '/^\//{ print $5 }')"
+
+check_filesystem_sizes
+
+# Second, check inode usage
+#
+_fs_percents="$(df -Pi | gawk '/^\//{ print $5 }')"
+
+check_filesystem_sizes
+
+if [ ${_overfull} -eq 1 ] ; then
+	alert_to_stdout
+	alert_to_logger
+	touch "${_lockfile}"
+else
+	cleanup
+fi
+
+exit 0

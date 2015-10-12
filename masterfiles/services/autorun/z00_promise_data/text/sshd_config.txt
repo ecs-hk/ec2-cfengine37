@@ -1,0 +1,36 @@
+# Managed by CFEngine
+
+Port 22
+AddressFamily inet
+Protocol 2
+
+HostKey /etc/ssh/ssh_host_rsa_key
+
+SyslogFacility AUTH
+
+PermitRootLogin without-password
+StrictModes yes
+AuthorizedKeysFile .ssh/authorized_keys
+
+PubkeyAuthentication yes
+RSAAuthentication no
+RhostsRSAAuthentication no
+HostbasedAuthentication no
+PasswordAuthentication no
+PermitEmptyPasswords no
+ChallengeResponseAuthentication no
+KerberosAuthentication no
+GSSAPIAuthentication no
+UsePAM yes
+
+UsePrivilegeSeparation sandbox
+
+Banner /etc/ssh/banner
+
+# Accept locale-related environment variables
+AcceptEnv LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES
+AcceptEnv LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT
+AcceptEnv LC_IDENTIFICATION LC_ALL LANGUAGE
+AcceptEnv XMODIFIERS
+
+Subsystem sftp	/usr/libexec/openssh/sftp-server

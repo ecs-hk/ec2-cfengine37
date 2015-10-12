@@ -1,0 +1,71 @@
+###############################################################################
+# Configure sshd and ensure it's running.
+###############################################################################
+
+bundle agent a50_sshd
+{
+
+meta:
+
+    "tags" slist => { "autorun" };
+
+methods:
+
+    amzn_2015_09::
+    "a50sshd" usebundle => a50_sshd_run;
+
+}
+
+bundle agent a50_sshd_run
+{
+
+vars:
+
+    "s_dir" string  => "$(a05_vars.text)";
+
+    "s_banner" string => "banner.txt";
+
+    "s_conf" string => "sshd_config.txt";
+
+files:
+
+    "/etc/ssh/banner"
+    handle          => "a50h_sshd_banner",
+    create          => "true",
+    perms           => mog("644","root","root"),
+    copy_from       => local_dcp("$(s_dir)/$(s_banner)"),
+    classes         => if_repaired("a50c_sshd_fixed");
+
+    "/etc/ssh/sshd_config"
+    handle          => "a50h_sshd_conf",
+    depends_on      => {"a50h_sshd_banner"},
+    perms           => mog("644","root","root"),
+    copy_from       => local_dcp("$(s_dir)/$(s_conf)"),
+    classes         => if_repaired("a50c_sshd_fixed");
+
+processes:
+
+    "\/sshd\b"
+    restart_class => "a50c_sshd_dead";
+
+commands:
+
+    a50c_sshd_fixed::
+    "/etc/init.d/sshd restart"
+    classes       => if_repaired("a50c_sshd_restarted");
+
+    a50c_sshd_dead::
+    "/etc/init.d/sshd start";
+
+    "/sbin/chkconfig sshd on"
+    classes     => if_repaired("a50c_sshd_started");
+
+    a50c_sshd_restarted::
+    "$(a05_vars.log_notice)"
+    args => "Fixed config and restarted sshd";
+
+    a50c_sshd_started::
+    "$(a05_vars.log_warning)"
+    args => "Started sshd and told it to autostart";
+
+}

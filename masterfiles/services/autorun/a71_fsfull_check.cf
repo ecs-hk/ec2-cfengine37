@@ -1,0 +1,42 @@
+###############################################################################
+# Install an hourly cronjob to check on and alert on filesystem space.
+###############################################################################
+
+bundle agent a71_fsfull_check
+{
+
+meta:
+
+    "tags" slist => { "autorun" };
+
+methods:
+
+    amzn_2015_09::
+    "a71fsfull" usebundle => a71_fsfull_run;
+
+}
+
+bundle agent a71_fsfull_run
+{
+
+vars:
+
+    "s_dir" string  => "$(a05_vars.scripts)";
+
+    "s_script" string => "fs-full-check.txt";
+
+files:
+
+    "/etc/cron.hourly/90-fs-full-check"
+    handle          => "a71h_fsfull_cronjob",
+    perms           => mog("755","root","root"),
+    copy_from       => local_dcp("$(s_dir)/$(s_script)"),
+    classes         => if_repaired("a71c_fsfull_script_fixed");
+
+commands:
+
+    a71c_fsfull_script_fixed::
+    "$(a05_vars.log_notice)"
+    args => "Installed cronjob to check on filesystem free space";
+
+}

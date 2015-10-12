@@ -1,0 +1,63 @@
+###############################################################################
+# Configure rsyslog daemon for special CFEngine logging, and ensure the
+# service stays running.
+###############################################################################
+
+bundle agent a16_cfe_rsyslog
+{
+
+meta:
+
+    "tags" slist => { "autorun" };
+
+methods:
+
+    amzn_2015_09::
+    "a16rsys" usebundle => a16_cfe_rsyslog_run;
+
+}
+
+bundle agent a16_cfe_rsyslog_run
+{
+
+vars:
+
+    "s_dir" string  => "$(a05_vars.text)";
+
+    "s_conf" string => "rsyslog.d.conf.txt";
+
+files:
+
+    "/etc/rsyslog.d/03-cfengine.conf"
+    handle          => "a16h_rsyslog_conf",
+    create          => "true",
+    perms           => mog("644","root","root"),
+    copy_from       => local_dcp("$(s_dir)/$(s_conf)"),
+    classes         => if_repaired("a16c_rsyslog_fixed");
+
+processes:
+
+    "\/rsyslogd\b"
+    restart_class => "a16c_rsyslog_dead";
+
+commands:
+
+    a16c_rsyslog_fixed::
+    "/etc/init.d/rsyslog restart"
+    classes       => if_repaired("a16c_rsyslog_restarted");
+
+    a16c_rsyslog_dead::
+    "/etc/init.d/rsyslog start";
+
+    "/sbin/chkconfig rsyslog on"
+    classes     => if_repaired("a16c_rsyslog_started");
+
+    a16c_rsyslog_restarted::
+    "$(a05_vars.log_notice)"
+    args => "Fixed config and restarted rsyslogd";
+
+    a16c_rsyslog_started::
+    "$(a05_vars.log_warning)"
+    args => "Started rsyslogd and told it to autostart";
+
+}

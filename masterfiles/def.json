@@ -1,0 +1,23 @@
+{
+    "classes": {
+        "cfengine_internal_disable_agent_email": [
+            "any"
+        ],
+        "cfengine_internal_encrypt_transfers": [
+            "any"
+        ],
+        "cfengine_internal_purge_policies": [
+            "any"
+        ],
+        "services_autorun": [
+            "any"
+        ]
+    },
+    "vars": {
+        "acl": [
+            "172.31.21.122/20"
+        ],
+        "agentfacility": "LOG_LOCAL3",
+        "domain": "ec2.local"
+    }
+}

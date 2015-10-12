@@ -1,0 +1,36 @@
+# -------------------------------------------------------------------------- #
+# Variables that may be useful to other promises. Must be accessed by their
+# fully-qualified name when referenced in other promises.
+# -------------------------------------------------------------------------- #
+
+bundle agent a05_vars
+{
+
+meta:
+
+    "tags" slist => { "autorun" };
+
+vars:
+
+    # Input data for promises
+
+    "pdata" string => "$(sys.inputdir)/services/autorun/z00_promise_data";
+
+    "json" string  => "$(pdata)/json";
+    "text" string  => "$(pdata)/text";
+    "scripts" string  => "$(pdata)/scripts";
+
+    # Logging commands
+
+    "o" string => "/usr/bin/logger -t CFE_logger -p local3";
+
+    "log_emerg" string => "$(o).emerg";
+    "log_alert" string => "$(o).alert";
+    "log_crit" string => "$(o).crit";
+    "log_err" string => "$(o).err";
+    "log_warning" string => "$(o).warning";
+    "log_notice" string => "$(o).notice";
+    "log_info" string => "$(o).info";
+    "log_debug" string => "$(o).debug";
+
+}

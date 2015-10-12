@@ -1,0 +1,42 @@
+###############################################################################
+# If the yum-cron-security package is installed, configure it.
+###############################################################################
+
+bundle agent a70_sec_updates
+{
+
+meta:
+
+    "tags" slist => { "autorun" };
+
+methods:
+
+    amzn_2015_09::
+    "a70secupdates" usebundle => a70_sec_run;
+
+}
+
+bundle agent a70_sec_run
+{
+
+vars:
+
+    "s_dir" string  => "$(a05_vars.text)";
+
+    "s_conf" string => "yum-cron-security.conf.txt";
+
+files:
+
+    "/etc/yum/yum-cron-security.conf"
+    handle          => "a70h_yumsec_conf",
+    perms           => mog("644","root","root"),
+    copy_from       => local_dcp("$(s_dir)/$(s_conf)"),
+    classes         => if_repaired("a70c_yumsec_fixed");
+
+commands:
+
+    a70c_yumsec_fixed::
+    "$(a05_vars.log_notice)"
+    args => "Fixed yum cron-security config";
+
+}

@@ -1,0 +1,20 @@
+# Managed by CFEngine
+
+driftfile /var/lib/ntp/drift
+restrict default nomodify notrap nopeer noquery
+restrict 127.0.0.1 
+restrict ::1
+
+server 0.amazon.pool.ntp.org iburst
+server 1.amazon.pool.ntp.org iburst
+server 2.amazon.pool.ntp.org iburst
+server 3.amazon.pool.ntp.org iburst
+
+includefile /etc/ntp/crypto/pw
+
+logconfig =clockall =peerall =sysall =syncall
+
+interface listen eth0
+interface ignore ipv6
+
+disable monitor

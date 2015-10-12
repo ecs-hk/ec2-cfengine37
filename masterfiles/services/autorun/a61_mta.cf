@@ -1,0 +1,39 @@
+###############################################################################
+# Ensure MTA service is running.
+###############################################################################
+
+bundle agent a61_mta
+{
+
+meta:
+
+    "tags" slist => { "autorun" };
+
+methods:
+
+    amzn_2015_09::
+    "a61mta" usebundle => a61_mta_run;
+
+}
+
+bundle agent a61_mta_run
+{
+
+processes:
+
+    "\bsendmail.\saccepting\sconnections\b"
+    restart_class => "a61c_mta_dead";
+
+commands:
+
+    a61c_mta_dead::
+    "/etc/init.d/sendmail start";
+
+    "/sbin/chkconfig sendmail on"
+    classes     => if_repaired("a61c_mta_started");
+
+    a61c_mta_started::
+    "$(a05_vars.log_warning)"
+    args => "Started sendmail and told it to autostart";
+
+}

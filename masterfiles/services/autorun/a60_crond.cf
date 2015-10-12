@@ -1,0 +1,39 @@
+###############################################################################
+# Ensure cron daemon is running.
+###############################################################################
+
+bundle agent a60_crond
+{
+
+meta:
+
+    "tags" slist => { "autorun" };
+
+methods:
+
+    amzn_2015_09::
+    "a60crond" usebundle => a60_crond_run;
+
+}
+
+bundle agent a60_crond_run
+{
+
+processes:
+
+    "\bcrond\b"
+    restart_class => "a60c_crond_dead";
+
+commands:
+
+    a60c_crond_dead::
+    "/etc/init.d/crond start";
+
+    "/sbin/chkconfig crond on"
+    classes     => if_repaired("a60c_crond_started");
+
+    a60c_crond_started::
+    "$(a05_vars.log_warning)"
+    args => "Started crond and told it to autostart";
+
+}
