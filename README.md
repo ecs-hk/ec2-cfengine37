@@ -12,7 +12,7 @@ https://cfengine.com/product/community/
 
 ## Deploy to CFEngine hub
 
-Install the CFEngine package and clone this git repository. Then:
+1. Install the CFEngine package and clone this git repository. Then:
 
 ```
 # cp -r ./ec2-cfengine37/masterfiles/* /var/cfengine/masterfiles
@@ -22,15 +22,15 @@ Install the CFEngine package and clone this git repository. Then:
 # service cfengine3 restart
 ```
 
-Edit vars.acl in `/var/cfengine/masterfiles/def.json` to include subnets you wish to allow in.
+2. Edit vars.acl in `/var/cfengine/masterfiles/def.json` to include subnets you wish to allow in.
 
 Always, **always** validate your JSON after editing it, or else CFEngine will silently ignore it.
 
 ```
 # python -m json.tool < def.json
+```
 
-
-You will also need to add a rule to your AWS Security Group to allow in TCP 5308 from CFEngine agents to the CFEngine hub.
+3. You will also need to add a rule to your AWS Security Group to allow in TCP 5308 from CFEngine agents to the CFEngine hub.
 
 ## Deploy to CFEngine agent
 
