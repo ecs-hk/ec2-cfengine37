@@ -21,11 +21,13 @@ bundle agent a50_sshd_run
 
 vars:
 
-    "s_dir" string  => "$(a05_vars.text)";
+    "s_mdir" string  => "$(a05_vars.mustache)";
+
+    "s_tdir" string  => "$(a05_vars.text)";
 
     "s_banner" string => "banner.txt";
 
-    "s_conf" string => "sshd_config.txt";
+    "s_conf" string => "sshd_config.mustache";
 
 files:
 
@@ -33,7 +35,7 @@ files:
     handle          => "a50h_sshd_banner",
     create          => "true",
     perms           => mog("644","root","root"),
-    copy_from       => local_dcp("$(s_dir)/$(s_banner)"),
+    copy_from       => local_dcp("$(s_tdir)/$(s_banner)"),
     classes         => if_repaired("a50c_sshd_fixed");
 
     "/etc/ssh/sshd_config"
@@ -41,7 +43,8 @@ files:
     create          => "false",
     depends_on      => {"a50h_sshd_banner"},
     perms           => mog("644","root","root"),
-    copy_from       => local_dcp("$(s_dir)/$(s_conf)"),
+    template_method => "mustache",
+    edit_template   => "$(s_mdir)/$(s_conf)",
     classes         => if_repaired("a50c_sshd_fixed");
 
 processes:
