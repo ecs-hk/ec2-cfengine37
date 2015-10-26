@@ -4,8 +4,12 @@
 
 Baseline promises for managing AWS EC2 instances running Amazon Linux. Designed to configure and watch key services, logging, filesystem space, and package security updates.
 
-Tested with:
-* `cfengine-community-3.7.1-1.x86_64.rpm` on Amazon Linux AMI release 2015.09
+Supported OSes:
+* Amazon Linux AMI release 2015.09
+* RHEL 6
+
+Tested with packages:
+* `cfengine-community-3.7.1-1.x86_64.rpm`
 
 Official CFEngine packages:
 https://cfengine.com/product/community/
