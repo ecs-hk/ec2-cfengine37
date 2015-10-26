@@ -10,6 +10,16 @@ meta:
 
     "tags" slist => { "autorun" };
 
+methods:
+
+    gc_supported_os::
+    "a10housekeep" usebundle => a10_cfe_housekeeping_run;
+
+}
+
+bundle agent a10_cfe_housekeeping_run
+{
+
 vars:
 
     "globs" slist => {

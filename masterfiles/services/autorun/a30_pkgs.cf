@@ -12,7 +12,7 @@ meta:
 
 methods:
 
-    amzn_2015_09::
+    gc_supported_os::
     "a30confrun" usebundle => a30_conf_run;
 
     "a30pkgrun" usebundle => a30_pkg_run;

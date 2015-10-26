@@ -1,0 +1,37 @@
+###############################################################################
+# Classes that may be useful to other promises. Because they're defined in
+# "bundle common", they can be accessed unqualified from any promise.
+###############################################################################
+
+bundle common a06_classes
+{
+
+meta:
+
+    "tags" slist => { "autorun" };
+
+classes:
+
+    "gc_supported_os" or => { "amzn_2015_09", "redhat_6" };
+
+    "gc_systemd" expression => fileexists("/bin/systemctl");
+
+}
+
+bundle agent a06_classes_check
+{
+
+meta:
+
+    "tags" slist => { "autorun" };
+
+reports:
+
+    # This is the only place we use a "reports" promise. It is
+    # here because un unsupported OS will not have the CFEngine
+    # /var/log file set up.
+
+    !gc_supported_os::
+    "This promise ruleset does not support your OS";
+
+}

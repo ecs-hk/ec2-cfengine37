@@ -11,7 +11,7 @@ meta:
 
 methods:
 
-    amzn_2015_09::
+    gc_supported_os::
     "a50sshd" usebundle => a50_sshd_run;
 
 }

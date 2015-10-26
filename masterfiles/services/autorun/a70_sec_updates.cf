@@ -11,7 +11,7 @@ meta:
 
 methods:
 
-    amzn_2015_09::
+    gc_supported_os::
     "a70secupdates" usebundle => a70_sec_run;
 
 }
@@ -24,6 +24,12 @@ vars:
     "s_dir" string  => "$(a05_vars.text)";
 
     "s_conf" string => "yum-cron-security.conf.txt";
+
+    "lockfile" string => "/var/lock/subsys/yum-cron";
+
+classes:
+
+    "a70_yumcron_enabled" expression => fileexists("$(lockfile)");
 
 files:
 
@@ -38,6 +44,20 @@ commands:
 
     a70c_yumsec_fixed::
     "$(a05_vars.log_notice)"
-    args => "Fixed yum cron-security config";
+    args => "Started the yum cron-security service";
+
+    !a70_yumcron_enabled::
+    "/etc/init.d/yum-cron restart"
+    handle => "a70h_yumcron_restart",
+    depends_on => { "a70h_yumsec_conf" };
+
+    "/sbin/chkconfig yum-cron on"
+    handle => "a70h_yumcron_enable",
+    depends_on => { "a70h_yumsec_conf" };
+
+    "$(a05_vars.log_notice)"
+    args => "Started the yum-cron service",
+    handle => "a70h_yumcron_log",
+    depends_on => { "a70h_yumsec_conf" };
 
 }

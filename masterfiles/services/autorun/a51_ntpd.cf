@@ -11,7 +11,7 @@ meta:
 
 methods:
 
-    amzn_2015_09::
+    gc_supported_os::
     "a51ntpd" usebundle => a51_ntpd_run;
 
 }

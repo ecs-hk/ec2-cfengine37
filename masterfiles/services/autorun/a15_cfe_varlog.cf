@@ -11,7 +11,7 @@ meta:
 
 methods:
 
-    amzn_2015_09::
+    gc_supported_os::
     "a15logr" usebundle => a15_cfe_varlog_run;
 
 }

@@ -12,7 +12,7 @@ meta:
 
 methods:
 
-    amzn_2015_09::
+    gc_supported_os::
     "a16rsys" usebundle => a16_cfe_rsyslog_run;
 
 }

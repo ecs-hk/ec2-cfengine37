@@ -11,7 +11,7 @@ meta:
 
 methods:
 
-    amzn_2015_09::
+    gc_supported_os::
     "a71fsfull" usebundle => a71_fsfull_run;
 
 }
