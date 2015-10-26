@@ -1,0 +1,43 @@
+###############################################################################
+# Set up root's environment - currently just .inputrc
+###############################################################################
+
+bundle agent a20_root_env
+{
+
+meta:
+
+    "tags" slist => { "autorun" };
+
+methods:
+
+    gc_supported_os::
+    "a20rootenv" usebundle => a20_root_env_run;
+
+}
+
+bundle agent a20_root_env_run
+{
+
+vars:
+
+    "s_dir" string  => "$(a05_vars.text)";
+
+    "s_conf" string => "inputrc.txt";
+
+files:
+
+    "/root/.inputrc"
+    handle          => "a20h_inputrc",
+    create          => "true",
+    perms           => mog("644","root","root"),
+    copy_from       => local_dcp("$(s_dir)/$(s_conf)"),
+    classes         => if_repaired("a20c_fixed");
+
+commands:
+
+    a20c_fixed::
+    "$(a05_vars.log_notice)"
+    args => "Fixed root's environment / dot-files";
+
+}

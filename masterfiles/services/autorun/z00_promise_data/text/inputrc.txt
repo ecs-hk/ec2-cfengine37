@@ -1,0 +1,11 @@
+# Managed by CFEngine
+# ---------------------------------------
+# This .inputrc enables a very useful feature with your bash history.
+# From the bash prompt, type the first character or two from a command
+# you've recently run, and then press the up arrow to jump immediately
+# to the most recent match in your history. (Keep pressing up or down
+# to scroll through history based on the character match.)
+# ---------------------------------------
+#
+"\e[A": history-search-backward
+"\e[B": history-search-forward
