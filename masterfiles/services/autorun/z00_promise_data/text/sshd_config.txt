@@ -26,6 +26,7 @@ UsePAM yes
 UsePrivilegeSeparation sandbox
 
 Banner /etc/ssh/banner
+PrintMotd yes
 
 # Accept locale-related environment variables
 AcceptEnv LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES

@@ -1,0 +1,1 @@
+Managed by CFEngine {{cfe_version}} (policy hub: {{cfe_hub}})

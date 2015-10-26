@@ -1,0 +1,48 @@
+###############################################################################
+# Install an motd that reports CFEngine version and hub.
+###############################################################################
+
+bundle agent a11_cfe_motd
+{
+
+meta:
+
+    "tags" slist => { "autorun" };
+
+methods:
+
+    gc_supported_os::
+    "a11motd" usebundle => a11_cfe_motd_run;
+
+}
+
+bundle agent a11_cfe_motd_run
+{
+
+vars:
+
+    "s_dir" string  => "$(a05_vars.text)";
+
+    "s_conf" string => "motd.txt";
+
+files:
+
+    "/etc/motd"
+    handle          => "a11h_motd",
+    create          => "true",
+    perms           => mog("644","root","root"),
+    edit_template   => "$(s_dir)/$(s_conf)",
+    template_method => "mustache",
+    template_data   => parsejson('{
+                           "cfe_version": "$(sys.cf_version)",
+                           "cfe_hub": "$(sys.policy_hub)"
+                       }'),
+    classes         => if_repaired("a11c_fixed");
+
+commands:
+
+    a11c_fixed::
+    "$(a05_vars.log_notice)"
+    args => "Installed motd with CFEngine version and hub info";
+
+}
