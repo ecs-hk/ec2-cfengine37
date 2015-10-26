@@ -22,12 +22,19 @@ bundle agent a10_cfe_housekeeping_run
 
 vars:
 
-    "globs" slist => {
-        "/etc/{logrotate.d,rsyslog.d}/*.{cfsaved,cf-before-edit}",
-        "/etc/cron.*/*.{cfsaved,cf-before-edit}"
-       };
-
-    "cruft" slist  => findfiles("$(globs)");
+    # Pretty silly to hardcode all this, but the {baz,boo} globbing
+    # does not appear to be working correctly.
+    "glob01" string => "/etc/cron.*/*.cfsaved";
+    "glob02" string => "/etc/cron.*/*.cf-before-edit";
+    "glob03" string => "/etc/logrotate.d/*.cfsaved";
+    "glob04" string => "/etc/logrotate.d/*.cf-before-edit";
+    "glob05" string => "/etc/rsyslog.d/*.cfsaved";
+    "glob06" string => "/etc/rsyslog.d/*.cf-before-edit";
+    
+    # And filefiles() appears to want a list of strings rather than
+    # and slist.
+    "cruft" slist  => findfiles("$(glob01)","$(glob02)","$(glob03)",
+                                "$(glob04)","$(glob05)","$(glob06)");
 
 files:
 
