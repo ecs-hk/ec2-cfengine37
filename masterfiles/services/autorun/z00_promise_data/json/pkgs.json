@@ -1,21 +1,25 @@
 {
-    "pkgs": [
-        "epel-release",
-        "util-linux",
-        "ntp",
-        "at",
-        "lsof",
-        "mailx",
-        "git",
-        "gawk",
-        "mlocate",
-        "openldap-clients",
-        "rsyslog",
-        "rsyslog-mysql",
-        "tcpdump",
-        "iotop",
-        "iperf",
-        "bash-completion",
-	"yum-cron-security"
+    "all_servers": [
+        "epel-release", 
+        "ntp", 
+        "at", 
+        "lsof", 
+        "mailx", 
+        "git", 
+        "gawk", 
+        "mlocate", 
+        "openldap-clients", 
+        "rsyslog", 
+        "rsyslog-mysql", 
+        "tcpdump", 
+        "iotop", 
+        "iperf", 
+        "bash-completion"
+    ], 
+    "amzn_2015_09": [
+        "util-linux"
+    ], 
+    "redhat_6": [
+        "util-linux-ng"
     ]
 }

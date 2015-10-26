@@ -28,8 +28,16 @@ vars:
 
 files:
 
+    "/etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-6"
+    handle          => "a30h_pkg_epel_key",
+    create          => "true",
+    perms           => mog("0644","root","root"),
+    copy_from       => local_dcp("$(s_dir)/RPM-GPG-KEY-EPEL-6.txt"),
+    classes         => if_repaired("a30c_fixed_epel"); 
+
     "/etc/yum.repos.d/epel.repo"
     handle          => "a30h_pkg_epel",
+    depends_on      => { "a30h_pkg_epel_key" },
     create          => "true",
     perms           => mog("0644","root","root"),
     copy_from       => local_dcp("$(s_dir)/epel.repo.txt"),
@@ -52,13 +60,22 @@ vars:
 
     "json_data" data => readjson("$(s_dir)/pkgs.json", 50000);
 
-    "pkg_list" slist => getvalues("json_data[pkgs]");
+    "baseline_pkgs" slist => getvalues("json_data[all_servers]");
+
+    "os_specific_pkgs" slist => getvalues("json_data[$(a05_vars.os)]");
 
 packages:
 
-    "$(pkg_list)"
-    handle          => "a30h_pkg_install",
-    depends_on      => { "a30h_pkg_epel" },
+    "$(baseline_pkgs)"
+    handle          => "a30h_pkg_install_baseline",
+    depends_on      => { "a30h_pkg_epel_key","a30h_pkg_epel" },
+    policy          => "present",
+    package_module  => yum,
+    classes         => if_repaired("a30c_fixed_pkgs");
+
+    "$(os_specific_pkgs)"
+    handle          => "a30h_pkg_install_os_specific",
+    depends_on      => { "a30h_pkg_epel_key","a30h_pkg_epel" },
     policy          => "present",
     package_module  => yum,
     classes         => if_repaired("a30c_fixed_pkgs");
