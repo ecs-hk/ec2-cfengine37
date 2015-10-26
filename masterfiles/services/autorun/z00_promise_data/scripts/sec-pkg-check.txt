@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# Managed by CFEngine
+
+# ------------------------------------------------------------------------- #
+#			VARIABLE DEFINITIONS
+# ------------------------------------------------------------------------- #
+
+PATH=/bin:/usr/bin
+
+readonly _kern_pkgs='kernel* *-kmdl-* kmod-* *firmware*'
+readonly _output='/tmp/cfe-pkg-check.txt'
+
+# ------------------------------------------------------------------------- #
+#			FUNCTIONS
+# ------------------------------------------------------------------------- #
+
+errout() {
+        printf '%s\n%s\n'                                               \
+        "${0} error:"                                                   \
+        "${1}"
+
+        exit 1
+}
+
+confirm_yum_installed() {
+        which yum >/dev/null 2>&1
+        if [ ${?} -ne 0 ] ; then
+                errout 'This is not a yum(8) based system'                
+        fi
+}
+
+yum_check_for_security_updates() {
+        # yum(8) is giving inconsistent results with check-update vs. update,
+        # so instead of relying on its sometimes erroneous exit code, we
+        # have to grep(1) output.
+        yum                                                             \
+        --security                                                      \
+        --exclude="${_kern_pkgs}"                                       \
+        check-update                                                    \
+        >>"${_output}" 2>&1
+
+        if grep -Eq '^No packages.*for security' "${_output}" ; then
+                return
+        elif grep -Eq '[0-9]+ package.*for security' "${_output}" ; then
+                logger -p local3.alert 'yum(8) security updates available'
+        else
+                errout "yum(8) check failed (see ${_output})"
+        fi
+}
+
+# ------------------------------------------------------------------------- #
+#			MAIN LOGIC
+# ------------------------------------------------------------------------- #
+
+confirm_yum_installed 
+yum_check_for_security_updates
+
+exit 0
