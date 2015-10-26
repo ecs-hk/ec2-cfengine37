@@ -26,10 +26,10 @@ classes:
 vars:
 
     a61c_postfix_installed::
-    "mta" string => "sendmail";
+    "mta" string => "postfix";
 
     !a61c_postfix_installed::
-    "mta" string => "postfix";
+    "mta" string => "sendmail";
 
 processes:
 
