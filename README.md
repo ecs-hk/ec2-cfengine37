@@ -2,7 +2,7 @@
 
 ## Synopsis
 
-Baseline promises for managing AWS EC2 instances running Amazon Linux. Designed to configure and watch key services, logging, filesystem space, and package security updates.
+Baseline promises for managing AWS EC2 instances. Designed to manage key services, set up logging, watch filesystem space, and check for package security updates.
 
 Supported OSes:
 * Amazon Linux AMI release 2015.09
