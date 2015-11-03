@@ -10,7 +10,30 @@ meta:
 
     "tags" slist => { "autorun" };
 
+methods:
+
+    "a05definevars" usebundle => gv;
+
+}
+
+bundle agent gv
+{
+
 vars:
+
+    # Detect and set $(os) variable, which is used to determine whether
+    # the promises in this project run at all.
+
+    amzn_2015_09::
+    "os" string => "amzn_2015_09";
+
+    redhat_6::
+    "os" string => "redhat_6";
+
+    redhat_7::
+    "os" string => "redhat_7";
+
+    any::
 
     # Input data for promises
 
@@ -34,12 +57,76 @@ vars:
     "log_info" string => "$(o).info";
     "log_debug" string => "$(o).debug";
 
-    # Detect and set OS, based on what these promises support
+    # Set variables for process patterns and service manipulation
+    # commands, which will be used by our service management promises.
 
     amzn_2015_09::
-    "os" string => "amzn_2015_09";
+    "p[crond]" string => "\bcrond\b";
+    "p[mta]" string => "\bsendmail.\saccepting\sconnections\b";
+    "p[ntpd]" string => "\bntpd\b";
+    "p[rsyslog]" string => "\/rsyslogd\b";
+    "p[sshd]" string => "\/sshd\b";
+
+    "start[crond]" string => "/etc/init.d/crond start";
+    "start[mta]" string => "/etc/init.d/sendmail start";
+    "start[ntpd]" string => "/etc/init.d/ntpd start";
+    "start[rsyslog]" string => "/etc/init.d/rsyslog start";
+    "start[sshd]" string => "/etc/init.d/sshd start";
+
+    "restart[ntpd]" string => "/etc/init.d/ntpd restart";
+    "restart[rsyslog]" string => "/etc/init.d/rsyslog restart";
+    "restart[sshd]" string => "/etc/init.d/sshd restart";
+
+    "enable[crond]" string => "/sbin/chkconfig crond on";
+    "enable[mta]" string => "/sbin/chkconfig sendmail on";
+    "enable[ntpd]" string => "/sbin/chkconfig ntpd on";
+    "enable[rsyslog]" string => "/sbin/chkconfig rsyslog on";
+    "enable[sshd]" string => "/sbin/chkconfig sshd on";
 
     redhat_6::
-    "os" string => "redhat_6";
+    "p[crond]" string => "\bcrond\b";
+    "p[mta]" string => "\bpostfix\/master\b";
+    "p[ntpd]" string => "\bntpd\b";
+    "p[rsyslog]" string => "\/rsyslogd\b";
+    "p[sshd]" string => "\/sshd\b";
+
+    "start[crond]" string => "/etc/init.d/crond start";
+    "start[mta]" string => "/etc/init.d/postfix start";
+    "start[ntpd]" string => "/etc/init.d/ntpd start";
+    "start[rsyslog]" string => "/etc/init.d/rsyslog start";
+    "start[sshd]" string => "/etc/init.d/sshd start";
+
+    "restart[ntpd]" string => "/etc/init.d/ntpd restart";
+    "restart[rsyslog]" string => "/etc/init.d/rsyslog restart";
+    "restart[sshd]" string => "/etc/init.d/sshd restart";
+
+    "enable[crond]" string => "/sbin/chkconfig crond on";
+    "enable[mta]" string => "/sbin/chkconfig postfix on";
+    "enable[ntpd]" string => "/sbin/chkconfig ntpd on";
+    "enable[rsyslog]" string => "/sbin/chkconfig rsyslog on";
+    "enable[sshd]" string => "/sbin/chkconfig sshd on";
+
+    redhat_7::
+    "p[crond]" string => "\/crond\b";
+    "p[mta]" string => "\bpostfix\/master\b";
+    "p[ntpd]" string => "\bntpd\b";
+    "p[rsyslog]" string => "\/rsyslogd\b";
+    "p[sshd]" string => "\/sshd\b";
+
+    "start[crond]" string => "/bin/systemctl start crond";
+    "start[mta]" string => "/bin/systemctl start postfix";
+    "start[ntpd]" string => "/bin/systemctl start ntpd";
+    "start[rsyslog]" string => "/bin/systemctl start rsyslog";
+    "start[sshd]" string => "/bin/systemctl start sshd";
+
+    "restart[ntpd]" string => "/bin/systemctl restart ntpd";
+    "restart[rsyslog]" string => "/bin/systemctl restart rsyslog";
+    "restart[sshd]" string => "/bin/systemctl restart sshd";
+
+    "enable[crond]" string => "/bin/systemctl enable crond";
+    "enable[mta]" string => "/bin/systemctl enable postfix";
+    "enable[ntpd]" string => "/bin/systemctl enable ntpd";
+    "enable[rsyslog]" string => "/bin/systemctl enable rsyslog";
+    "enable[sshd]" string => "/bin/systemctl enable sshd";
 
 }
