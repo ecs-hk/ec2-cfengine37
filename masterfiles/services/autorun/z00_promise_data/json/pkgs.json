@@ -21,5 +21,8 @@
     ], 
     "redhat_6": [
         "util-linux-ng"
-    ]
+    ],
+    "redhat_7": [
+        "util-linux"
+    ] 
 }
