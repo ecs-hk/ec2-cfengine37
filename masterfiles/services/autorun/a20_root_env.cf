@@ -21,7 +21,7 @@ bundle agent a20_root_env_run
 
 vars:
 
-    "s_dir" string  => "$(a05_vars.text)";
+    "s_dir" string  => "$(gv.text)";
 
     "s_conf" string => "inputrc.txt";
 
@@ -37,7 +37,7 @@ files:
 commands:
 
     a20c_fixed::
-    "$(a05_vars.log_notice)"
+    "$(gv.log_notice)"
     args => "Fixed root's environment / dot-files";
 
 }

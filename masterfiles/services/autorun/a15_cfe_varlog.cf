@@ -21,7 +21,7 @@ bundle agent a15_cfe_varlog_run
 
 vars:
 
-    "s_dir" string  => "$(a05_vars.text)";
+    "s_dir" string  => "$(gv.text)";
 
     "s_conf" string => "logrotate.d.conf.txt";
 
@@ -43,7 +43,7 @@ files:
 commands:
 
     a15c_logrotate_fixed::
-    "$(a05_vars.log_notice)"
+    "$(gv.log_notice)"
     args => "Set up CFEngine /var/log file and logrotate conf";
 
 }

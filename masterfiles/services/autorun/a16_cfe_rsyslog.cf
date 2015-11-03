@@ -22,7 +22,7 @@ bundle agent a16_cfe_rsyslog_run
 
 vars:
 
-    "s_dir" string  => "$(a05_vars.text)";
+    "s_dir" string  => "$(gv.text)";
 
     "s_conf" string => "rsyslog.d.conf.txt";
 
@@ -37,27 +37,27 @@ files:
 
 processes:
 
-    "\/rsyslogd\b"
+    "$(gv.p[rsyslog])"
     restart_class => "a16c_rsyslog_dead";
 
 commands:
 
     a16c_rsyslog_fixed::
-    "/etc/init.d/rsyslog restart"
-    classes       => if_repaired("a16c_rsyslog_restarted");
+    "$(gv.restart[rsyslog])"
+    classes     => if_repaired("a16c_rsyslog_restarted");
 
     a16c_rsyslog_dead::
-    "/etc/init.d/rsyslog start";
+    "$(gv.start[rsyslog])";
 
-    "/sbin/chkconfig rsyslog on"
+    "$(gv.enable[rsyslog])"
     classes     => if_repaired("a16c_rsyslog_started");
 
     a16c_rsyslog_restarted::
-    "$(a05_vars.log_notice)"
+    "$(gv.log_notice)"
     args => "Fixed config and restarted rsyslogd";
 
     a16c_rsyslog_started::
-    "$(a05_vars.log_warning)"
+    "$(gv.log_warning)"
     args => "Started rsyslogd and told it to autostart";
 
 }

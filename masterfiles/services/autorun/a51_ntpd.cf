@@ -21,7 +21,7 @@ bundle agent a51_ntpd_run
 
 vars:
 
-    "s_dir" string  => "$(a05_vars.text)";
+    "s_dir" string  => "$(gv.text)";
 
     "s_conf" string => "ntp.conf.txt";
 
@@ -36,27 +36,27 @@ files:
 
 processes:
 
-    "\bntpd\b"
+    "$(gv.p[ntpd])"
     restart_class => "a51c_ntpd_dead";
 
 commands:
 
     a51c_ntpd_fixed::
-    "/etc/init.d/ntpd restart"
+    "$(gv.restart[ntpd])"
     classes       => if_repaired("a51c_ntpd_restarted");
 
     a51c_ntpd_dead::
-    "/etc/init.d/ntpd start";
+    "$(gv.start[ntpd])";
 
-    "/sbin/chkconfig ntpd on"
+    "$(gv.enable[ntpd])"
     classes     => if_repaired("a51c_ntpd_started");
 
     a51c_ntpd_restarted::
-    "$(a05_vars.log_notice)"
+    "$(gv.log_notice)"
     args => "Fixed config and restarted ntpd";
 
     a51c_ntpd_started::
-    "$(a05_vars.log_warning)"
+    "$(gv.log_warning)"
     args => "Started ntpd and told it to autostart";
 
 }

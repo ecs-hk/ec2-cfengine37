@@ -21,7 +21,7 @@ bundle agent a11_cfe_motd_run
 
 vars:
 
-    "s_dir" string  => "$(a05_vars.text)";
+    "s_dir" string  => "$(gv.text)";
 
     "s_conf" string => "motd.txt";
 
@@ -42,7 +42,7 @@ files:
 commands:
 
     a11c_fixed::
-    "$(a05_vars.log_notice)"
+    "$(gv.log_notice)"
     args => "Installed motd with CFEngine version and hub info";
 
 }

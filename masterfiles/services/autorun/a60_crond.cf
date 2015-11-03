@@ -21,19 +21,19 @@ bundle agent a60_crond_run
 
 processes:
 
-    "\bcrond\b"
+    "$(gv.p[crond])"
     restart_class => "a60c_crond_dead";
 
 commands:
 
     a60c_crond_dead::
-    "/etc/init.d/crond start";
+    "$(gv.start[crond])";
 
-    "/sbin/chkconfig crond on"
+    "$(gv.enable[crond])"
     classes     => if_repaired("a60c_crond_started");
 
     a60c_crond_started::
-    "$(a05_vars.log_warning)"
+    "$(gv.log_warning)"
     args => "Started crond and told it to autostart";
 
 }

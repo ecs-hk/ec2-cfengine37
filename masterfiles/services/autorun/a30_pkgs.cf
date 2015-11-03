@@ -24,7 +24,7 @@ bundle agent a30_conf_run
 
 vars:
 
-    "s_dir" string  => "$(a05_vars.text)";
+    "s_dir" string  => "$(gv.text)";
 
 files:
 
@@ -46,7 +46,7 @@ files:
 commands:
 
     a30c_fixed_epel::
-    "$(a05_vars.log_notice)"
+    "$(gv.log_notice)"
     args => "Repaired EPEL yum configuration";
 
 }
@@ -56,13 +56,13 @@ bundle agent a30_pkg_run
 
 vars:
 
-    "s_dir" string  => "$(a05_vars.json)";
+    "s_dir" string  => "$(gv.json)";
 
     "json_data" data => readjson("$(s_dir)/pkgs.json", 50000);
 
     "baseline_pkgs" slist => getvalues("json_data[all_servers]");
 
-    "os_specific_pkgs" slist => getvalues("json_data[$(a05_vars.os)]");
+    "os_specific_pkgs" slist => getvalues("json_data[$(gv.os)]");
 
 packages:
 
@@ -83,7 +83,7 @@ packages:
 commands:
 
     a30c_fixed_pkgs::
-    "$(a05_vars.log_notice)"
+    "$(gv.log_notice)"
     args => "Installed baseline packages";
 
 }

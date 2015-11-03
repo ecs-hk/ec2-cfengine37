@@ -19,38 +19,21 @@ methods:
 bundle agent a61_mta_run
 {
 
-classes:
-
-    "a61c_postfix_installed" expression => fileexists("/etc/init.d/postfix");
-
-vars:
-
-    a61c_postfix_installed::
-    "mta" string => "postfix";
-
-    !a61c_postfix_installed::
-    "mta" string => "sendmail";
-
 processes:
 
-    a61c_postfix_installed::
-    "\bpostfix\/master\b"
-    restart_class => "a61c_mta_dead";
-
-    !a61c_postfix_installed::
-    "\bsendmail.\saccepting\sconnections\b"
+    "$(gv.p[mta])"
     restart_class => "a61c_mta_dead";
 
 commands:
 
     a61c_mta_dead::
-    "/etc/init.d/$(mta) start";
+    "$(gv.start[mta])";
 
-    "/sbin/chkconfig $(mta) on"
+    "$(gv.enable[mta])"
     classes     => if_repaired("a61c_mta_started");
 
     a61c_mta_started::
-    "$(a05_vars.log_warning)"
-    args => "Started $(mta) and told it to autostart";
+    "$(gv.log_warning)"
+    args => "Started MTA daemon and told it to autostart";
 
 }

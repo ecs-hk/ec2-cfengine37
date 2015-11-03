@@ -21,7 +21,7 @@ bundle agent a71_fsfull_run
 
 vars:
 
-    "s_dir" string  => "$(a05_vars.scripts)";
+    "s_dir" string  => "$(gv.scripts)";
 
     "s_script" string => "fs-full-check.txt";
 
@@ -37,7 +37,7 @@ files:
 commands:
 
     a71c_fsfull_script_fixed::
-    "$(a05_vars.log_notice)"
+    "$(gv.log_notice)"
     args => "Installed cronjob to check on filesystem free space";
 
 }

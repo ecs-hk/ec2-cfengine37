@@ -21,9 +21,9 @@ bundle agent a50_sshd_run
 
 vars:
 
-    "s_mdir" string  => "$(a05_vars.mustache)";
+    "s_mdir" string  => "$(gv.mustache)";
 
-    "s_tdir" string  => "$(a05_vars.text)";
+    "s_tdir" string  => "$(gv.text)";
 
     "s_banner" string => "banner.txt";
 
@@ -49,27 +49,27 @@ files:
 
 processes:
 
-    "\/sshd\b"
+    "$(gv.p[sshd])"
     restart_class => "a50c_sshd_dead";
 
 commands:
 
     a50c_sshd_fixed::
-    "/etc/init.d/sshd restart"
+    "$(gv.restart[sshd])"
     classes       => if_repaired("a50c_sshd_restarted");
 
     a50c_sshd_dead::
-    "/etc/init.d/sshd start";
+    "$(gv.start[sshd])";
 
-    "/sbin/chkconfig sshd on"
+    "$(gv.enable[sshd])"
     classes     => if_repaired("a50c_sshd_started");
 
     a50c_sshd_restarted::
-    "$(a05_vars.log_notice)"
+    "$(gv.log_notice)"
     args => "Fixed config and restarted sshd";
 
     a50c_sshd_started::
-    "$(a05_vars.log_warning)"
+    "$(gv.log_warning)"
     args => "Started sshd and told it to autostart";
 
 }

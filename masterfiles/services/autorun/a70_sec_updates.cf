@@ -21,7 +21,7 @@ bundle agent a70_sec_updates_run
 
 vars:
 
-    "s_dir" string  => "$(a05_vars.scripts)";
+    "s_dir" string  => "$(gv.scripts)";
 
     "s_script" string => "sec-pkg-check.txt";
 
@@ -37,7 +37,7 @@ files:
 commands:
 
     a70c_secpkg_script_fixed::
-    "$(a05_vars.log_notice)"
+    "$(gv.log_notice)"
     args => "Installed cronjob to check for package security updates";
 
 }
