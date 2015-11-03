@@ -11,7 +11,9 @@ meta:
 
 methods:
 
-    gc_supported_os::
+    # Only relevant on Amazon's EL6-based AMIs.
+
+    gc_supported_os.gc_el6::
     "a80nfs" usebundle => a80_nfs_run;
 
 }
@@ -42,11 +44,11 @@ commands:
     classes     => if_repaired("a80c_nfslock_stopped");
 
     a80c_rpcbind_stopped::
-    "$(a05_vars.log_warning)"
+    "$(gv.log_warning)"
     args => "Shut off and disabled the rpcbind service";
 
     a80c_nfslock_stopped::
-    "$(a05_vars.log_warning)"
+    "$(gv.log_warning)"
     args => "Shut off and disabled the nfslock service";
 
 }
