@@ -2,11 +2,12 @@
 
 ## Synopsis
 
-Baseline promises for managing AWS EC2 instances. Designed to manage key services, set up logging, watch filesystem space, and check for package security updates.
+Baseline promises for managing AWS EC2 instances. Performs sshd, ntpd, and rsyslog configuration, keeps important services running, watches filesystem space, and checks for package security updates.
 
 Supported OSes:
 * Amazon Linux AMI release 2015.09
 * RHEL 6
+* RHEL 7
 
 Tested with packages:
 * `cfengine-community-3.7.1-1.x86_64.rpm`
@@ -38,7 +39,7 @@ Always, **always** validate your JSON after editing it, or else CFEngine will si
 # python -m json.tool < def.json
 ```
 
-You will also need to add a rule to your AWS Security Group to allow in TCP 5308 from CFEngine agents to the CFEngine hub.
+You will also need to add a rule to your EC2 Security Group to allow in TCP 5308 from CFEngine agents to the CFEngine hub.
 
 ### Bootstrap to yourself
 
