@@ -12,9 +12,11 @@ meta:
 
 classes:
 
-    "gc_supported_os" expression => not(strcmp("$(a05_vars.os)",""));
+    "gc_supported_os" expression => not(strcmp("$(gv.os)",""));
 
-    "gc_systemd" expression => fileexists("/bin/systemctl");
+    "gc_el6" or => { "amzn_2015_09", "redhat_6" };
+
+    "gc_el7" or => { "redhat_7" };
 
 }
 
