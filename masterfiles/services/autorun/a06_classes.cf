@@ -1,14 +1,26 @@
 ###############################################################################
-# Classes that may be useful to other promises. Because they're defined in
+# Classes that may be useful to other promises. When they're defined in
 # "bundle common", they can be accessed unqualified from any promise.
 ###############################################################################
 
-bundle common a06_classes
+bundle agent a06_classes
 {
 
 meta:
 
     "tags" slist => { "autorun" };
+
+methods:
+
+    "a06classg" usebundle => a06_set_global_classes;
+
+    !gc_supported_os::
+    "a06classr" usebundle => a06_report_unsupported_os;
+
+}
+
+bundle common a06_set_global_classes
+{
 
 classes:
 
@@ -18,14 +30,13 @@ classes:
 
     "gc_el7" or => { "redhat_7" };
 
+    "gc_security_pkg_auto_install" expression =>
+            strcmp("$(gv.localconf[securityUpdates])","install");
+
 }
 
-bundle agent a06_classes_check
+bundle agent a06_report_unsupported_os
 {
-
-meta:
-
-    "tags" slist => { "autorun" };
 
 reports:
 
@@ -33,7 +44,6 @@ reports:
     # here because un unsupported OS will not have the CFEngine
     # /var/log file set up.
 
-    !gc_supported_os::
     "This promise ruleset does not support your OS";
 
 }
