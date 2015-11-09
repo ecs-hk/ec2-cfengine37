@@ -32,7 +32,7 @@ files:
     "/etc/cron.daily/80-sec-pkg-check"
     handle          => "a70h_secpkg_c_cronjob_del",
     delete          => tidy,
-    classes         => if_repaired("a70c_secpkg_script_fixed");
+    classes         => if_repaired("a70c_secpkg_script_rmd");
 
     "/etc/cron.daily/80-sec-pkg-install"
     handle          => "a70h_secpkg_i_cronjob",
@@ -46,7 +46,7 @@ files:
     "/etc/cron.daily/80-sec-pkg-install"
     handle          => "a70h_secpkg_i_cronjob_del",
     delete          => tidy,
-    classes         => if_repaired("a70c_secpkg_script_fixed");
+    classes         => if_repaired("a70c_secpkg_script_rmd");
 
     "/etc/cron.daily/80-sec-pkg-check"
     handle          => "a70h_secpkg_c_cronjob",
@@ -58,8 +58,11 @@ files:
 
 commands:
 
+    a70c_secpkg_script_rmd::
+    "$(gv.log_notice)"
+    args => "Removed old cronjob for package security updates";
+
     a70c_secpkg_script_fixed::
     "$(gv.log_notice)"
     args => "Installed cronjob to manage package security updates";
-
 }
