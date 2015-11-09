@@ -31,7 +31,8 @@ yum_install_security_updates() {
 	update								\
         >"${_output}" 2>&1
 
-        if grep -Eq '^Nothing to do' "${_output}" ; then
+        if grep								\
+	-Eq '^Nothing to do|^No packages.*for security' "${_output}" ; then
                 return
         elif grep -Eq '^Updated\:' "${_output}" ; then
                 logger							\
