@@ -15,6 +15,8 @@ methods:
     gc_supported_os::
     "a16rsys" usebundle => a16_cfe_rsyslog_run;
 
+    "a16rsmy" usebundle => a16_cfe_rsyslog_mysql_run;
+
 }
 
 bundle agent a16_cfe_rsyslog_run
@@ -59,5 +61,62 @@ commands:
     a16c_rsyslog_started::
     "$(gv.log_warning)"
     args => "Started rsyslogd and told it to autostart";
+
+}
+
+bundle agent a16_cfe_rsyslog_mysql_run
+{
+
+# This bundle enables CFEngine logging to a MySQL DB. It relies on
+# the rsyslog-mysql package, and on the presence of a credentials
+# file. (Note that the credentials file must be created on the
+# CFEngine hub at your site. It is ignored by git, because it would
+# contain private URI and authentication info.
+
+# Example $(s_json) file for an AWS RDS DB:
+#
+# {
+#     "host": "syslogdb.xyzxyz.us-southwest-88.rds.amazonaws.com",
+#     "pw": "goodpassword",
+#     "user": "someguy"
+# }
+
+vars:
+
+    "s_jdir" string  => "$(gv.json)";
+
+    "s_mdir" string  => "$(gv.mustache)";
+
+    "s_json" string => "rsyslog-mysql-creds.json";
+
+    "s_conf" string => "rsyslog-mysql.conf.mustache";
+
+classes:
+
+    "a16c_pkg_ready" expression => fileexists("/lib64/rsyslog/ommysql.so");
+
+    "a16c_creds_ready" expression => fileexists("$(s_jdir)/$(s_json)");
+
+files:
+
+    a16c_pkg_ready.a16c_creds_ready::
+    "/etc/rsyslog.d/04-mysql.conf"
+    handle          => "a16h_rsyslog_mysql_conf",
+    create          => "true",
+    perms           => mog("640","root","root"),
+    edit_template   => "$(s_mdir)/$(s_conf)",
+    template_method => "mustache",
+    template_data   => readjson("$(s_jdir)/$(s_json)", 50000),
+    classes         => if_repaired("a16c_rsyslog_mysql_fixed");
+
+commands:
+
+    a16c_rsyslog_mysql_fixed::
+    "$(gv.restart[rsyslog])"
+    classes     => if_repaired("a16c_rsyslog_restarted");
+
+    a16c_rsyslog_restarted::
+    "$(gv.log_notice)"
+    args => "Fixed config and restarted rsyslogd";
 
 }

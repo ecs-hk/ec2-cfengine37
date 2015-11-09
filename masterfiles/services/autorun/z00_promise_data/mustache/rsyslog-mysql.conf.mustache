@@ -1,0 +1,6 @@
+# Managed by CFEngine
+$ModLoad ommysql
+*.emerg    :ommysql:{{host}},Syslog,{{user}},{{pw}}
+*.alert    :ommysql:{{host}},Syslog,{{user}},{{pw}}
+*.crit     :ommysql:{{host}},Syslog,{{user}},{{pw}}
+local3.*   :ommysql:{{host}},Syslog,{{user}},{{pw}}
