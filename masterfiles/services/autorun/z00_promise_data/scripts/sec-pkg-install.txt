@@ -2,8 +2,8 @@
 
 # Managed by CFEngine
 
-# This cronjob checks for package security updates and logs a messages
-# if they are available. It excludes kernel and firmware packages.
+# This cronjob automatically installs security updates, but it excludes
+# kernel and firmware packages.
 
 # ------------------------------------------------------------------------- #
 #			VARIABLE DEFINITIONS
@@ -20,26 +20,27 @@ readonly _kern_pkgs='kernel* *-kmdl-* kmod-* *firmware*'
 #			FUNCTIONS
 # ------------------------------------------------------------------------- #
 
-yum_check_for_security_updates() {
+yum_install_security_updates() {
         # yum(8) is giving inconsistent results with check-update vs. update,
         # so instead of relying on its sometimes erroneous exit code, we
         # have to grep(1) output.
         yum                                                             \
+	-y								\
         --security                                                      \
         --exclude="${_kern_pkgs}"                                       \
-        check-update                                                    \
+	update								\
         >"${_output}" 2>&1
 
-        if grep -Eq '^No packages.*for security' "${_output}" ; then
+        if grep -Eq '^Nothing to do' "${_output}" ; then
                 return
-        elif grep -Eq '[0-9]+ package.*for security' "${_output}" ; then
+        elif grep -Eq '^Updated\:' "${_output}" ; then
                 logger							\
-		-p local3.alert						\
-		"${_me}: yum(8) security updates available"
+		-p local3.notice					\
+		"${_me}: yum(8) installed security updates"
         else
                 logger							\
 		-p local3.err						\
-		"${_me}: yum(8) check failed (see ${_output})"
+		"${_me}: yum(8) updates failed (see ${_output})"
         fi
 }
 
@@ -47,6 +48,6 @@ yum_check_for_security_updates() {
 #			MAIN LOGIC
 # ------------------------------------------------------------------------- #
 
-yum_check_for_security_updates
+yum_install_security_updates
 
 exit 0

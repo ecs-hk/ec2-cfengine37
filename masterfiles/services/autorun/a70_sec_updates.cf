@@ -23,21 +23,43 @@ vars:
 
     "s_dir" string  => "$(gv.scripts)";
 
-    "s_script" string => "sec-pkg-check.txt";
-
 files:
 
+    # Either the security package check script or the security
+    # package install script will be active (not both).
+
+    gc_security_pkg_auto_install::
     "/etc/cron.daily/80-sec-pkg-check"
-    handle          => "a70h_secpkg_cronjob",
+    handle          => "a70h_secpkg_c_cronjob_del",
+    delete          => tidy,
+    classes         => if_repaired("a70c_secpkg_script_fixed");
+
+    "/etc/cron.daily/80-sec-pkg-install"
+    handle          => "a70h_secpkg_i_cronjob",
+    depends_on      => { "a70h_secpkg_c_cronjob_del" },
     create          => "true",
     perms           => mog("755","root","root"),
-    copy_from       => local_dcp("$(s_dir)/$(s_script)"),
+    copy_from       => local_dcp("$(s_dir)/sec-pkg-install.txt"),
+    classes         => if_repaired("a70c_secpkg_script_fixed");
+
+    !gc_security_pkg_auto_install::
+    "/etc/cron.daily/80-sec-pkg-install"
+    handle          => "a70h_secpkg_i_cronjob_del",
+    delete          => tidy,
+    classes         => if_repaired("a70c_secpkg_script_fixed");
+
+    "/etc/cron.daily/80-sec-pkg-check"
+    handle          => "a70h_secpkg_c_cronjob",
+    depends_on      => { "a70h_secpkg_i_cronjob_del" },
+    create          => "true",
+    perms           => mog("755","root","root"),
+    copy_from       => local_dcp("$(s_dir)/sec-pkg-check.txt"),
     classes         => if_repaired("a70c_secpkg_script_fixed");
 
 commands:
 
     a70c_secpkg_script_fixed::
     "$(gv.log_notice)"
-    args => "Installed cronjob to check for package security updates";
+    args => "Installed cronjob to manage package security updates";
 
 }
