@@ -4,8 +4,6 @@ Port 22
 AddressFamily inet
 Protocol 2
 
-HostKey /etc/ssh/ssh_host_rsa_key
-
 SyslogFacility AUTH
 
 PermitRootLogin without-password
@@ -27,9 +25,21 @@ UsePAM yes
 
 {{#classes.amzn_2015_09}}
 UsePrivilegeSeparation sandbox
+HostKey /etc/ssh/ssh_host_rsa_key
+HostKey /etc/ssh/ssh_host_ecdsa_key
+HostKey /etc/ssh/ssh_host_ed25519_key
 {{/classes.amzn_2015_09}}
+
+{{#classes.redhat_7}}
+UsePrivilegeSeparation sandbox
+HostKey /etc/ssh/ssh_host_rsa_key
+HostKey /etc/ssh/ssh_host_ecdsa_key
+HostKey /etc/ssh/ssh_host_ed25519_key
+{{/classes.redhat_7}}
+
 {{#classes.redhat_6}}
 UsePrivilegeSeparation yes
+HostKey /etc/ssh/ssh_host_rsa_key
 {{/classes.redhat_6}}
 
 # Mustache derived section end --------------------------------------------
