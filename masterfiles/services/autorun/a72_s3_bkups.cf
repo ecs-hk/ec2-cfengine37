@@ -1,0 +1,78 @@
+###############################################################################
+# Install a dailly cronjob to push encrypted backups to AWS S3.
+###############################################################################
+
+bundle agent a72_s3_bkups
+{
+
+meta:
+
+    "tags" slist => { "autorun" };
+
+methods:
+
+    gc_supported_os::
+    "a72s3bkup" usebundle => a72_s3_bkup_script_run;
+
+    "a72s3key" usebundle => a72_s3_key_run;
+
+}
+
+bundle agent a72_s3_bkup_script_run
+{
+
+vars:
+
+    "s_dir" string  => "$(gv.scripts)";
+
+    "s_name" string => "bkup-to-s3";
+
+files:
+
+    "/etc/cron.daily/80-$(s_name)"
+    handle          => "a72h_bkup_cronjob",
+    create          => "true",
+    perms           => mog("755","root","root"),
+    copy_from       => local_dcp("$(s_dir)/$(s_name).txt"),
+    classes         => if_repaired("a72c_bkup_script_fixed");
+
+commands:
+
+    a72c_bkup_script_fixed::
+    "$(gv.log_notice)"
+    args => "Installed cronjob for S3 backups";
+
+}
+
+bundle agent a72_s3_key_run
+{
+
+vars:
+
+    "s_dir" string  => "$(gv.text)";
+
+    "s_name" string => "bkup-to-s3";
+
+    "s_keyfile" string => "$(s_dir)/$(s_name)-secretkey.txt";
+
+classes:
+
+    "a72c_keyfile_ready" expression => fileexists("$(s_keyfile)");
+
+files:
+
+    a72c_keyfile_ready::
+    "/root/$(s_name).key"
+    handle          => "a72h_bkup_cronjob",
+    create          => "true",
+    perms           => mog("400","root","root"),
+    copy_from       => local_dcp("$(s_keyfile)"),
+    classes         => if_repaired("a72c_bkup_key_fixed");
+
+commands:
+
+    a72c_bkup_key_fixed::
+    "$(gv.log_notice)"
+    args => "Installed encryption key for S3 backups";
+
+}

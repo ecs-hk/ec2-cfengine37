@@ -1,0 +1,132 @@
+#!/bin/bash
+
+# Managed by CFEngine
+
+# This cronjob tars, compresses, and encrypts directories, then pushes them
+# to AWS S3 - if:
+#   1) aws CLI is configured for the EUID running the script; and
+#   2) an encryption key file is found; and
+#   3) a file containing directories to back up is found.
+#
+# To decrypt backed-up, encrypted tarballs, use:
+#   openssl enc -aes128 -in $infile -out $outfile -d -a
+
+# ------------------------------------------------------------------------- #
+#			VARIABLE DEFINITIONS
+# ------------------------------------------------------------------------- #
+
+PATH=/usr/bin:/bin
+
+readonly _me="${0##*/}"
+readonly _output="/tmp/${_me}.log"
+
+readonly _key="/root/${_me}.key"
+readonly _bkup_list="/root/${_me}.list"
+
+# ------------------------------------------------------------------------- #
+#			FUNCTIONS
+# ------------------------------------------------------------------------- #
+
+errout() {
+	local _msg="${_me} error: ${1}"
+
+	printf '%s\n' "${_msg}"
+	logger -p local3.err "${_msg}"
+
+	exit 1
+}
+
+noticeout() {
+	# Not an error condition. Log to a non-scary syslog level,
+	# and get out quietly.
+
+	local _msg="${_me}: ${1}"
+
+	printf '%s\n' "${_msg}"
+	logger -p local3.notice "${_msg}"
+
+	exit 0
+}
+
+audits() {
+	if [ "$(whoami)" != "root" ] ; then
+		errout "I only run as root"
+	fi
+
+	if [ ! -e "${_key}" ] ; then
+		noticeout "No key file found. Backups will not run."
+	fi
+	
+	if [ ! -e "${_bkup_list}" ] ; then
+		noticeout "No backup list found. Backups will not run."
+	fi
+
+	aws s3 help >/dev/null 2>&1
+	if [ ${?} -ne 0 ] ; then
+		errout "aws CLI test returned an error"
+	fi
+
+	if [ ! -e ~/.aws/credentials ] ; then
+		errout "aws CLI has not been configured yet"
+	fi
+}
+
+set_bkup_name() {
+	# The backup name is set so that a rolling twelve months and a
+	# rolling ~thirty days are kept in AWS S3 for each unique hostname.
+
+	local _day="$(date +%d)"
+	local _month="$(date +%m)"
+	local _b
+
+	if [ "${_day}" == "01" ] ; then
+		_b="${HOSTNAME}-Monthly-${_month}-${_day}"
+	else
+		_b="${HOSTNAME}-Daily-${_day}"
+	fi
+
+	readonly _bkup_name="${_b}"
+}
+
+build_list_of_files() {
+	# Just be reasonable, and don't put annoying filenames into your
+	# backup list (e.g. files that start with "-", files with spaces
+	# in the name). If you're backing up such files, then specify
+	# the parent directory instead.
+
+	local _f
+	local _list
+
+	while read _f ; do
+		_list="${_list} ${_f}"
+	done < "${_bkup_list}"
+
+	if [ -z "${_list}" ] ; then
+		errout "Nothing specified for me to back up"
+	fi
+
+	readonly _list_of_files="${_list}"
+}
+
+# ------------------------------------------------------------------------- #
+#			MAIN LOGIC
+# ------------------------------------------------------------------------- #
+
+audits
+set_bkup_name
+build_list_of_files
+
+cp /dev/null "${_output}"
+
+tar cfz - ${_list_of_files}						\
+2>> "${_output}"							|
+openssl enc -aes128 -salt -pass file:"${_key}" -e -a			\
+2>> "${_output}"							|
+aws s3 cp - s3://encbkups/"${_bkup_name}.tgz.enc"			\
+>> "${_output}" 2>&1
+
+if [ ${?} -ne 0 ] ; then
+	errout "Backup failed. Check log ${_output}"
+fi
+
+exit 0
