@@ -79,12 +79,12 @@ By default, this promise collection warns (via logging) when package security up
 
 ### Push encrypted backups (tarballs) to AWS S3
 
-Automatic (encrypted) backups can be activated by doing the following:
+Automatic (encrypted) backups can be activated by completing the following:
 
-- Create an s3://encbkups/ bucket
-- Setup an account via IAM with appropriate permissions to write to the bucket
-- Create the file `/var/cfengine/masterfiles/services/autorun/z00_promise_data/text/bkup-to-s3-secretkey.txt` on your CFEngine hub, with a **strong** key in it
-- Create the file `/root/bkup-to-s3.list` on each CFEngine agent system, with a list of directories to be backed up, a la:
+1. Create an s3://encbkups/ bucket
+2. Setup an account via IAM with appropriate permissions to write to the bucket
+3. Create the file `/var/cfengine/masterfiles/services/autorun/z00_promise_data/text/bkup-to-s3-secretkey.txt` on your CFEngine hub, with a **strong** key inside it
+4. Create the file `/root/bkup-to-s3.list` on each CFEngine agent system, with a list of directories to be backed up, a la:
 
 ```
 /etc
