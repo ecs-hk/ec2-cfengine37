@@ -49,24 +49,22 @@ bundle agent a72_s3_key_run
 
 vars:
 
-    "s_dir" string  => "$(gv.text)";
+    "s_dir" string  => "$(gv.secrets)";
 
-    "s_name" string => "bkup-to-s3";
-
-    "s_keyfile" string => "$(s_dir)/$(s_name)-secretkey.txt";
+    "s_name" string => "bkup-to-s3.key";
 
 classes:
 
-    "a72c_keyfile_ready" expression => fileexists("$(s_keyfile)");
+    "a72c_keyfile_ready" expression => fileexists("$(s_dir)/$(s_name).txt");
 
 files:
 
     a72c_keyfile_ready::
-    "/root/$(s_name).key"
-    handle          => "a72h_bkup_cronjob",
+    "/root/$(s_name)"
+    handle          => "a72h_bkup_key",
     create          => "true",
     perms           => mog("400","root","root"),
-    copy_from       => local_dcp("$(s_keyfile)"),
+    copy_from       => local_dcp("$(s_dir)/$(s_name).txt"),
     classes         => if_repaired("a72c_bkup_key_fixed");
 
 commands:
