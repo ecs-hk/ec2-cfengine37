@@ -16,6 +16,8 @@ methods:
 
     "a72s3key" usebundle => a72_s3_key_run;
 
+    "a72s3creds" usebundle => a72_s3_creds_run;
+
 }
 
 bundle agent a72_s3_bkup_script_run
@@ -60,7 +62,7 @@ classes:
 files:
 
     a72c_keyfile_ready::
-    "/root/$(s_name)"
+    "/usr/local/etc/$(s_name)"
     handle          => "a72h_bkup_key",
     create          => "true",
     perms           => mog("400","root","root"),
@@ -72,5 +74,53 @@ commands:
     a72c_bkup_key_fixed::
     "$(gv.log_notice)"
     args => "Installed encryption key for S3 backups";
+
+}
+
+bundle agent a72_s3_creds_run
+{
+
+# This bundle runs files promises that have a similar effect as
+# the shell command-line invocation of 'aws configure' (using the
+# AWS CLI program). It relies on the presence of a credentials file.
+
+vars:
+
+    "s_secdir" string  => "$(gv.secrets)";
+
+    "s_mdir" string  => "$(gv.mustache)";
+
+    "s_json" string => "bkup-to-s3-creds.json";
+
+    "s_conf" string => "aws-credentials.mustache";
+
+classes:
+
+    "a72c_creds_ready" expression => fileexists("$(s_secdir)/$(s_json)");
+
+files:
+
+    a72c_creds_ready::
+    "/root/.aws/."
+    handle          => "a72h_aws_confdir",
+    create          => "true",
+    perms           => mog("755","root","root"),
+    classes         => if_repaired("a72c_aws_conf_fixed");
+
+    "/root/.aws/credentials"
+    handle          => "a72h_aws_creds",
+    depends_on      => { "a72h_aws_confdir" },
+    create          => "true",
+    perms           => mog("600","root","root"),
+    edit_template   => "$(s_mdir)/$(s_conf)",
+    template_method => "mustache",
+    template_data   => readjson("$(s_secdir)/$(s_json)", 50000),
+    classes         => if_repaired("a72c_aws_conf_fixed");
+
+commands:
+
+    a72c_aws_conf_fixed::
+    "$(gv.log_notice)"
+    args => "Fixed AWS CLI config for root";
 
 }

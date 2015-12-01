@@ -83,9 +83,9 @@ Automatic (encrypted) backups can be activated by completing the following steps
 
 1. Using AWS S3, create an `s3://encbkups/` bucket.
 2. Using AWS IAM, create an account via IAM with appropriate permissions to write to the S3 bucket.
-3. On the CFEngine hub, create the file `masterfiles/services/autorun/z01_secrets/bkup-to-s3.key.txt` - and put a **strong** key inside it.
-4. On each CFEngine agent, configure aws CLI (run `aws configure`) using the new IAM credentials.
-5. On each CFEngine agent, create the file `/root/bkup-to-s3.list` - with a list of directories to be backed up, a la:
+3. On the CFEngine hub, create the file `masterfiles/services/autorun/z01_secrets/bkup-to-s3.key.txt` - and put a **strong** file encryption key inside it.
+4. On the CFEngine hub, create the file `masterfiles/services/autorun/z01_secrets/bkup-to-s3-creds.json` using the new IAM credentials.
+5. On each CFEngine agent, create the file `/usr/local/etc/bkup-to-s3.list` - with a list of directories to be backed up, a la:
 
 ```
 /etc
