@@ -1,2 +1,2 @@
-*-creds.json
-*-secretkey.txt
+**/z01_secrets/*.txt
+**/z01_secrets/*.json

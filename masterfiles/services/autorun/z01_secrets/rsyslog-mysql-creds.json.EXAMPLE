@@ -1,0 +1,5 @@
+{
+    "host": "syslogdb.xyzxyz.us-southwest-88.rds.amazonaws.com",
+    "pw": "goodpassword",
+    "user": "someguy"
+}

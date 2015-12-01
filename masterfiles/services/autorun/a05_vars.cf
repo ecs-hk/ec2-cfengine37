@@ -59,6 +59,10 @@ vars:
     "scripts" string  => "$(pdata)/scripts";
     "text" string  => "$(pdata)/text";
 
+    # Sensitive (credential, key) data for promises. Should be in .gitignore.
+
+    "secrets" string => "$(sys.inputdir)/services/autorun/z01_secrets";
+
     # Logging commands
 
     "o" string => "/usr/bin/logger -t CFE_logger -p local3";

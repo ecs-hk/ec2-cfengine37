@@ -83,7 +83,7 @@ bundle agent a16_cfe_rsyslog_mysql_run
 
 vars:
 
-    "s_jdir" string  => "$(gv.json)";
+    "s_secdir" string  => "$(gv.secrets)";
 
     "s_mdir" string  => "$(gv.mustache)";
 
@@ -95,7 +95,7 @@ classes:
 
     "a16c_pkg_ready" expression => fileexists("/lib64/rsyslog/ommysql.so");
 
-    "a16c_creds_ready" expression => fileexists("$(s_jdir)/$(s_json)");
+    "a16c_creds_ready" expression => fileexists("$(s_secdir)/$(s_json)");
 
 files:
 
@@ -106,7 +106,7 @@ files:
     perms           => mog("640","root","root"),
     edit_template   => "$(s_mdir)/$(s_conf)",
     template_method => "mustache",
-    template_data   => readjson("$(s_jdir)/$(s_json)", 50000),
+    template_data   => readjson("$(s_secdir)/$(s_json)", 50000),
     classes         => if_repaired("a16c_rsyslog_mysql_fixed");
 
 commands:
