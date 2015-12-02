@@ -1,8 +1,10 @@
-# CFEngine 3.7 promises for Amazon Linux
+# CFEngine 3.7 promises for Amazon EC2
 
 ## Synopsis
 
 Baseline promises for managing AWS EC2 instances. Performs sshd, ntpd, and rsyslog configuration, keeps important services running, watches filesystem space, and checks for package security updates.
+
+(Also see "Optional features" section below.)
 
 Supported OSes:
 * Amazon Linux AMI release 2015.09
@@ -62,6 +64,8 @@ On each agent system, install the CFEngine package. Then:
 ```
 
 Use the IP address of your CFEngine hub instead of the above.
+
+---
 
 ## Optional features
 
