@@ -81,16 +81,25 @@ By default, this promise collection warns (via logging) when package security up
 
 Automatic (encrypted) backups can be activated by completing the following steps.
 
+#### One-time AWS setup
+
 1. Using AWS S3, create an `s3://encbkups/` bucket.
 2. Using AWS IAM, create an account via IAM with appropriate permissions to write to the S3 bucket.
-3. On the CFEngine hub, create the file `masterfiles/services/autorun/z01_secrets/bkup-to-s3.key.txt` - and put a **strong** file encryption key inside it.
-4. On the CFEngine hub, create the file `masterfiles/services/autorun/z01_secrets/bkup-to-s3-creds.json` using the new IAM credentials.
-5. On each CFEngine agent, create the file `/usr/local/etc/bkup-to-s3.list` - with a list of directories to be backed up, a la:
+
+#### One-time CFEngine hub setup
+
+1. Create the file `masterfiles/services/autorun/z01_secrets/bkup-to-s3.key.txt` - and put a **strong** file encryption key inside it.
+2. Create the file `masterfiles/services/autorun/z01_secrets/bkup-to-s3-creds.json` using the new IAM credentials.
+
+#### Setup on each CFEngine agent
+
+1. Determine which directories should be backed up.
+5. Create the file `/usr/local/etc/bkup-to-s3.list` - with a list of those directories, a la:
 
 ```
 /etc
 /var/www
-/my/important/data
+/var/lib/openldap
 ```
 
 ### Promise logging to a MySQL DB (e.g. AWS RDS)

@@ -1,0 +1,57 @@
+###############################################################################
+# Install a *temporary* hourly cronjob to check for and install AWS CLI.
+#
+# As long as there is no AWS CLI detected on the system, this cronjob will
+# continue running and try to install it (and report if it cannot).
+###############################################################################
+
+bundle agent a73_aws_cli
+{
+
+meta:
+
+    "tags" slist => { "autorun" };
+
+methods:
+
+    gc_supported_os::
+    "a73awscli" usebundle => a73_aws_cli_run;
+
+}
+
+bundle agent a73_aws_cli_run
+{
+
+vars:
+
+    "s_dir" string  => "$(gv.scripts)";
+
+files:
+
+    !gc_aws_cli_installed::
+    "/etc/cron.hourly/90-install-aws-cli"
+    handle          => "a73h_aws_cronjob_add",
+    create          => "true",
+    perms           => mog("755","root","root"),
+    copy_from       => local_dcp("$(s_dir)/install-aws-cli.txt"),
+    classes         => if_repaired("a73c_aws_cronjob_added");
+
+    # If the AWS CLI is already installed, delete this cronjob.
+
+    gc_aws_cli_installed::
+    "/etc/cron.hourly/90-install-aws-cli"
+    handle          => "a73h_aws_cronjob_del",
+    delete          => tidy,
+    classes         => if_repaired("a73c_aws_cronjob_rmd");
+
+commands:
+
+    a73c_aws_cronjob_added::
+    "$(gv.log_notice)"
+    args => "Added cronjob to get AWS CLI downloaded and installed";
+
+    a73c_aws_cronjob_rmd::
+    "$(gv.log_notice)"
+    args => "Removed cronjob for installing AWS CLI (its work is done)";
+
+}

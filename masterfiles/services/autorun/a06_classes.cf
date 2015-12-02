@@ -30,8 +30,18 @@ classes:
 
     "gc_el7" or => { "redhat_7" };
 
+    # If the agent system has specified that security updates should
+    # be automatically installed, set this class.
+
     "gc_security_pkg_auto_install" expression =>
             strcmp("$(gv.localconf[securityUpdates])","install");
+
+    # AWS CLI is bundled with Amazon Linux AMIs already, but we do this
+    # check for all OSes, since we rely on it.
+
+    "gc_aws_cli_installed" or => { fileexists("/usr/bin/aws"),
+                                   fileexists("/usr/local/bin/aws"),
+                                   fileexists("/bin/aws") };
 
 }
 

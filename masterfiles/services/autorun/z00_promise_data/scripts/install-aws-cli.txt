@@ -1,0 +1,119 @@
+#!/bin/bash
+
+# Managed by CFEngine
+
+# This cronjob attempts to download and install the AWS CLI utilities
+# provided by the Amazon folks. For more details, see:
+#
+#   http://docs.aws.amazon.com/cli/latest/userguide/installing.html
+
+# ------------------------------------------------------------------------- #
+#			VARIABLE DEFINITIONS
+# ------------------------------------------------------------------------- #
+
+PATH=/usr/bin:/bin:/usr/local/bin
+
+readonly _me="${0##*/}"
+readonly _output="/tmp/${_me}.log"
+
+readonly _uri='https://s3.amazonaws.com/aws-cli'
+readonly _aws_bundle='awscli-bundle'
+
+# ------------------------------------------------------------------------- #
+#			FUNCTIONS
+# ------------------------------------------------------------------------- #
+
+errout() {
+	local _msg="${_me} error: ${1}"
+
+	printf '%s\n' "${_msg}"
+	logger -p local3.err "${_msg}"
+
+	exit 1
+}
+
+noticeout() {
+	# Not an error condition. Log to a non-scary syslog level,
+	# and get out quietly.
+
+	local _msg="${_me}: ${1}"
+
+	printf '%s\n' "${_msg}"
+	logger -p local3.notice "${_msg}"
+
+	exit 0
+}
+
+audits() {
+	if [ "$(whoami)" != "root" ] ; then
+		errout "I only run as root"
+	fi
+
+	aws help >/dev/null 2>&1
+	if [ ${?} -eq 0 ] ; then
+		noticeout "aws CLI already installed"
+	fi
+}
+
+cleanup() {
+	rm -fr "${_aws_bundle}" "${_aws_bundle}.zip"
+}
+
+cwd_to_tmp() {
+	local _d='/tmp'
+
+	cd "${_d}" > "${_output}" 2>&1
+
+	if [ ${?} -ne 0 ] ; then
+		errout "Yikes. Cannot cwd to ${_d}"
+	fi
+}
+
+download_aws_cli_bundle() {
+	curl "${_uri}/${_aws_bundle}.zip"				\
+	-o "${_aws_bundle}.zip"						\
+	>> "${_output}" 2>&1
+	
+	if [ ${?} -ne 0 ] ; then
+		errout "Problem downloading bundle. See ${_output}"
+	fi
+}
+
+unzip_aws_cli_bundle() {
+	unzip "${_aws_bundle}.zip"					\
+	>> "${_output}" 2>&1
+	
+	if [ ${?} -ne 0 ] ; then
+		errout "Problem unzipping bundle. See ${_output}"
+	fi
+}
+
+install_aws_cli_bundle() {
+	"./${_aws_bundle}/install"					\
+	-i /usr/local/aws						\
+	-b /usr/local/bin/aws						\
+	>> "${_output}" 2>&1
+	
+	if [ ${?} -ne 0 ] ; then
+		errout "Problem installing AWS CLI. See ${_output}"
+	fi
+}
+
+# ------------------------------------------------------------------------- #
+#			MAIN LOGIC
+# ------------------------------------------------------------------------- #
+
+audits
+
+cwd_to_tmp
+cleanup
+
+cp /dev/null "${_output}"
+
+download_aws_cli_bundle
+unzip_aws_cli_bundle
+install_aws_cli_bundle
+
+cleanup
+
+exit 0
