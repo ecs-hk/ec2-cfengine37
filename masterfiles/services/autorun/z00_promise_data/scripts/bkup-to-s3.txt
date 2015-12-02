@@ -15,7 +15,7 @@
 #			VARIABLE DEFINITIONS
 # ------------------------------------------------------------------------- #
 
-PATH=/usr/bin:/bin
+PATH=/usr/bin:/bin:/usr/local/bin
 
 readonly _me="${0##*/}"
 readonly _output="/tmp/${_me}.log"
