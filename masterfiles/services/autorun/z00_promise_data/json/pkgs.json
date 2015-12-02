@@ -14,6 +14,8 @@
         "tcpdump", 
         "iotop", 
         "iperf", 
+        "curl", 
+        "unzip", 
         "bash-completion"
     ], 
     "amzn_2015_09": [
