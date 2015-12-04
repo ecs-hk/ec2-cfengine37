@@ -20,8 +20,8 @@ PATH=/usr/bin:/bin:/usr/local/bin
 readonly _me="${0##*/}"
 readonly _output="/tmp/${_me}.log"
 
-readonly _key="/usr/local/etc/${_me}.key"
-readonly _bkup_list="/usr/local/etc/${_me}.list"
+readonly _key='/usr/local/etc/bkup-to-s3.key'
+readonly _bkup_list='/usr/local/etc/bkup-to-s3.list'
 
 # ------------------------------------------------------------------------- #
 #			FUNCTIONS
