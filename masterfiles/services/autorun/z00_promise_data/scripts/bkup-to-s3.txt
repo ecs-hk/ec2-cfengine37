@@ -21,6 +21,7 @@ readonly _me="${0##*/}"
 readonly _output="/tmp/${_me}.log"
 
 readonly _key='/usr/local/etc/bkup-to-s3.key'
+readonly _env='/usr/local/etc/bkup-to-s3.env'
 readonly _bkup_list='/usr/local/etc/bkup-to-s3.list'
 
 # ------------------------------------------------------------------------- #
@@ -55,6 +56,10 @@ audits() {
 
 	if [ ! -e "${_key}" ] ; then
 		noticeout "No key file found. Backups will not run."
+	fi
+	
+	if [ ! -e "${_env}" ] ; then
+		noticeout "No env file found. Backups will not run."
 	fi
 	
 	if [ ! -e "${_bkup_list}" ] ; then
@@ -116,13 +121,15 @@ audits
 set_bkup_name
 build_list_of_files
 
+. "${_env}"
+
 cp /dev/null "${_output}"
 
 tar cfz - ${_list_of_files}						\
 2>> "${_output}"							|
 openssl enc -aes128 -salt -pass file:"${_key}" -e -a			\
 2>> "${_output}"							|
-aws s3 cp - s3://encbkups/"${_bkup_name}.tgz.enc"			\
+aws s3 cp - s3://"${S3_BUCKET}"/"${_bkup_name}.tgz.enc"			\
 >> "${_output}" 2>&1
 
 if [ ${?} -ne 0 ] ; then
