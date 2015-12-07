@@ -73,11 +73,21 @@ Optional features are _not_ enabled by default. Each requires one or more steps 
 
 ## Automatic installation of package security updates
 
-By default, this promise collection warns (via logging) when package security updates are available. To install the package security updates automatically, create the file `/usr/local/etc/cfengine.json` on each CFEngine hub system where the auto-install is desired. Populate it with the following:
+By default, this promise collection warns (via logging) when package security updates are available. To install the package security updates automatically, create or edit the file `/usr/local/etc/cfengine.json` on each CFEngine hub system where the auto-install is desired. Populate it with the following:
 
 ```
 {
     "securityUpdates": "install"
+}
+```
+
+## Enable sshd(8) password authentication
+
+By default, this promise collection enables sshd(8) pubkey authentication and disables all other authentication forms. To also enable password authentication, create or edit the file `/usr/local/etc/cfengine.json` on each CFEngine hub system where it's desired. Populate it with the following:
+
+```
+{
+    "sshdPasswordAuth": "enable"
 }
 ```
 
@@ -87,13 +97,13 @@ Automatic (encrypted) backups can be activated by completing the following steps
 
 ### One-time AWS setup
 
-1. Using AWS S3, create an `s3://encbkups/` bucket.
+1. Using AWS S3, create a bucket for encrypted backups. Note that [S3 bucket names must be globally-unique](http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html) (across all customer accounts!), so utilize a consistent prefix or suffix to help ensure uniqueness, e.g. " `s3://my.org.encbkups/`
 2. Using AWS IAM, create an account via IAM with appropriate permissions to write to the S3 bucket.
 
 ### One-time CFEngine hub setup
 
 1. Create the file `masterfiles/services/autorun/z01_secrets/bkup-to-s3.key.txt` - and put a **strong** file encryption key inside it.
-2. Create the file `masterfiles/services/autorun/z01_secrets/bkup-to-s3-creds.json` using the new IAM credentials.
+2. Create the file `masterfiles/services/autorun/z01_secrets/bkup-to-s3-creds.json` using the new IAM credentials and the name of the bucket you created.
 
 ### Setup on each CFEngine agent
 
