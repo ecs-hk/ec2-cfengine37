@@ -10,19 +10,32 @@ PermitRootLogin without-password
 StrictModes yes
 AuthorizedKeysFile .ssh/authorized_keys
 
+# By default, this CFEngine ruleset enables pubkey authentication and
+# disables all other authentication methods. However, password auth
+# can optionally be enabled: https://github.com/ecs-hk/ec2-cfengine37
+# (See "optional features" in README.)
+
 PubkeyAuthentication yes
 RSAAuthentication no
 RhostsRSAAuthentication no
 HostbasedAuthentication no
-PasswordAuthentication no
 PermitEmptyPasswords no
 ChallengeResponseAuthentication no
 KerberosAuthentication no
 GSSAPIAuthentication no
 UsePAM yes
 
-# Mustache derived section begin --------------------------------------------
+# Mustache derived based on global classes - begin ---------------------------
+{{#classes.gc_enable_ssh_password_auth}}
+PasswordAuthentication yes
+{{/classes.gc_enable_ssh_password_auth}}
 
+{{^classes.gc_enable_ssh_password_auth}}
+PasswordAuthentication no
+{{/classes.gc_enable_ssh_password_auth}}
+# Mustache derived based on global classes - end -----------------------------
+
+# Mustache derived based on OS - begin ---------------------------------------
 {{#classes.amzn_2015_09}}
 UsePrivilegeSeparation sandbox
 HostKey /etc/ssh/ssh_host_rsa_key
@@ -41,8 +54,7 @@ HostKey /etc/ssh/ssh_host_ed25519_key
 UsePrivilegeSeparation yes
 HostKey /etc/ssh/ssh_host_rsa_key
 {{/classes.redhat_6}}
-
-# Mustache derived section end --------------------------------------------
+# Mustache derived based on OS - end -----------------------------------------
 
 Banner /etc/ssh/banner
 PrintMotd yes

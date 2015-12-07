@@ -36,6 +36,13 @@ classes:
     "gc_security_pkg_auto_install" expression =>
             strcmp("$(gv.localconf[securityUpdates])","install");
 
+    # If the agent system has specified that sshd(8) should allow
+    # password authentication (which this ruleset disables by default),
+    # then set this class.
+
+    "gc_enable_ssh_password_auth" expression =>
+            strcmp("$(gv.localconf[sshdPasswordAuth])","enable");
+
     # AWS CLI is bundled with Amazon Linux AMIs already, but we do this
     # check for all OSes, since we rely on it.
 
