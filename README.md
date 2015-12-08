@@ -97,24 +97,26 @@ Automatic (encrypted) backups can be activated by completing the following steps
 
 ### One-time AWS setup
 
-1. Using AWS S3, create a bucket for encrypted backups. Note that [S3 bucket names must be globally-unique](http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html) (across all customer accounts!), so utilize a consistent prefix or suffix to help ensure uniqueness, e.g. " `s3://my.org.encbkups/`
+1. Using AWS S3, create a bucket for encrypted backups. Note that [S3 bucket names must be globally-unique](http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html) (across all customer accounts!), so utilize a consistent prefix or suffix to help ensure uniqueness, e.g. `s3://my.org.encbkups/`
 2. Using AWS IAM, create an account via IAM with appropriate permissions to write to the S3 bucket.
 
 ### One-time CFEngine hub setup
 
-1. Create the file `masterfiles/services/autorun/z01_secrets/bkup-to-s3.key.txt` - and put a **strong** file encryption key inside it.
+1. Create the file `masterfiles/services/autorun/z01_secrets/bkup-to-s3.key.txt` - and put a **strong** file encryption key inside it. This key will be used to AES-encrypt (and decrypt, if/when needed) your backup tarballs.
 2. Create the file `masterfiles/services/autorun/z01_secrets/bkup-to-s3-creds.json` using the new IAM credentials and the name of the bucket you created.
 
 ### Setup on each CFEngine agent
 
 1. Determine which directories should be backed up.
-5. Create the file `/usr/local/etc/bkup-to-s3.list` - with a list of those directories, a la:
+2. Create the file `/usr/local/etc/bkup-to-s3.list` - with a list of those directories, a la:
 
 ```
 /etc
 /var/www
 /var/lib/openldap
 ```
+
+The directories you specify will be all rolled into a single tarball, AES-encrypted, and then pushed to your S3 bucket. The encrypted tarball will be named after the agent hostname.
 
 ## Promise logging to a MySQL DB (e.g. AWS RDS)
 
