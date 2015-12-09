@@ -71,7 +71,7 @@ audits() {
 		errout "aws CLI test returned an error"
 	fi
 
-	if [ ! -e ~/.aws/credentials ] ; then
+	if [ ! -e "${HOME}/.aws/credentials" ] ; then
 		errout "aws CLI has not been configured yet"
 	fi
 }
