@@ -1,0 +1,72 @@
+#!/bin/bash
+
+# Managed by CFEngine
+
+# Query the process table for CFE daemons to make sure they haven't croaked. 
+# This should be run as a cronjob. A daily interval is probably sufficient
+# for most environments.
+
+# --------------------------------------------------------------------------- #
+#               VARIABLE DEFINITIONS
+# --------------------------------------------------------------------------- #
+
+PATH=/usr/bin:/bin
+
+readonly _output="$(mktemp)"
+readonly _me="${0##*/}"
+
+# --------------------------------------------------------------------------- #
+#               FUNCTIONS
+# --------------------------------------------------------------------------- #
+
+errout() {
+        local _msg="${_me} error: ${1}"
+
+        printf '%s\n' "${_msg}"
+        logger -p local3.err "${_msg}"
+        cleanup
+
+        exit 1
+}
+
+cleanup() {
+        rm -f "${_output}"
+}
+
+capture_process_table() {
+        ps -ef                                                          \
+        > "${_output}"
+
+        if [ ${?} -ne 0 ] ; then
+                errout 'Unable to write a simple ps(1) listing to file'
+        fi
+}
+
+count_cfe_daemons() {
+        local _rc
+        local _count
+
+        _count="$(grep -Ec '\<cf-(execd|serverd|monitord)\>' ${_output})"
+        _rc=${?}
+
+        if [ ${_rc} -eq 1 ] ; then
+                errout "CFEngine is not running on ${HOSTNAME}"
+        elif [ ${_rc} -ne 0 ] ; then
+                errout 'Problem while using grep(1) to read file'
+        fi
+
+        if [ "${_count}" != "3" ] ; then
+                errout "CFEngine is partially stopped on ${HOSTNAME}"
+        fi
+}
+
+# --------------------------------------------------------------------------- #
+#               MAIN LOGIC               
+# --------------------------------------------------------------------------- #
+
+capture_process_table
+count_cfe_daemons
+
+cleanup
+
+exit 0

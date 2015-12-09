@@ -1,0 +1,43 @@
+###############################################################################
+# Install an daily cronjob to alert if CFEngine daemons are stopped.
+###############################################################################
+
+bundle agent a74_cfe_checker
+{
+
+meta:
+
+    "tags" slist => { "autorun" };
+
+methods:
+
+    gc_supported_os::
+    "a74cfecheck" usebundle => a74_cfe_checker_run;
+
+}
+
+bundle agent a74_cfe_checker_run
+{
+
+vars:
+
+    "s_dir" string  => "$(gv.scripts)";
+
+    "s_script" string => "cfe-daemon-check.txt";
+
+files:
+
+    "/etc/cron.daily/80-cfe-daemon-check"
+    handle          => "a74h_cfecheck_cronjob",
+    create          => "true",
+    perms           => mog("755","root","root"),
+    copy_from       => local_dcp("$(s_dir)/$(s_script)"),
+    classes         => if_repaired("a74c_cfecheck_script_fixed");
+
+commands:
+
+    a74c_cfecheck_script_fixed::
+    "$(gv.log_notice)"
+    args => "Installed cronjob to check on CFEngine daemons";
+
+}
