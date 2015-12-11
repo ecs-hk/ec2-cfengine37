@@ -17,6 +17,8 @@
 
 PATH=/usr/bin:/bin:/usr/local/bin
 
+export HOME=/root
+
 readonly _me="${0##*/}"
 readonly _output="/tmp/${_me}.log"
 
