@@ -25,6 +25,11 @@ vars:
 
     "s_conf" string => "motd.mustache";
 
+classes:
+
+    "a11c_update_motd_installed" expression
+            => fileexists("/var/lib/update-motd/.");
+
 files:
 
     "/etc/motd"
@@ -39,10 +44,21 @@ files:
                        }'),
     classes         => if_repaired("a11c_fixed");
 
+    a11c_update_motd_installed::
+    "/var/lib/update-motd/disabled"
+    handle          => "a11h_update_motd_disable",
+    create          => "true",
+    perms           => mog("644","root","root"),
+    classes         => if_repaired("a11c_disabled_update_motd");
+
 commands:
 
     a11c_fixed::
     "$(gv.log_notice)"
     args => "Installed motd with CFEngine version and hub info";
+
+    a11c_disabled_update_motd::
+    "$(gv.log_notice)"
+    args => "Disabled the update-motd (Amazon package) process";
 
 }
