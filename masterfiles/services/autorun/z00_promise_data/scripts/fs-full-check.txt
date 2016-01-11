@@ -9,7 +9,12 @@
 PATH=/bin:/usr/bin
 
 readonly _upper_limit=95
-readonly _lockfile=/tmp/fs-full.lock
+
+# A suffixed (%d) lockfile ensures that we are alerted about a full
+# filesystem on a daily basis.
+#
+readonly _lockfile=/tmp/fs-full.lock.$(date +%d)
+readonly _lockglob=/tmp/fs-full.lock.*
 _overfull=0
 
 # ------------------------------------------------------------------------- #
@@ -61,7 +66,10 @@ alert_to_logger() {
 }
 
 cleanup() {
-	rm -f "${_lockfile}"
+	# This cleans up any old lock files that are laying around.
+	# Do note quote $_lockglob, or bash won't expand it correctly.
+	#
+	rm -f ${_lockglob}
 }
 
 # ------------------------------------------------------------------------- #
