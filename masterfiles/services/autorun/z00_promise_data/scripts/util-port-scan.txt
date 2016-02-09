@@ -1,0 +1,92 @@
+#!/usr/bin/perl
+
+# Managed by CFEngine
+
+# --------------------------------------------------------------------------- #
+#               PRAGMAS
+# --------------------------------------------------------------------------- #
+
+use warnings;
+use strict;
+use 5.008;
+use IO::Socket;
+use Socket;
+
+# --------------------------------------------------------------------------- #
+#               FUNCTIONS
+# --------------------------------------------------------------------------- #
+
+sub errout {
+        my ($msg) = @_;
+
+        print "$msg\n";
+        exit 2
+}
+
+sub test_name_resolution {
+        my ($host) = @_;
+        my @res = gethostbyname($host);
+
+	unless (@res) {
+		errout "Cannot resolve hostname '$host'";
+	}
+}
+
+sub test_ip_value {
+        my ($ip) = @_;
+
+        unless ($ip =~ /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/ &&
+                (($1 <= 255 && $2 <= 255 && $3 <= 255 && $4 <= 255))) {
+                errout "Invalid IP address: '$ip'";
+        }
+}
+
+sub test_port_value {
+        my ($port) = @_;
+
+        unless ($port =~ /^\d+$/) {
+                errout "Non-numeric port: '$port'";
+        }
+
+        if ($port < 1 || $port > 65535) {
+                errout "Outside valid port range: '$port'";
+        }
+}
+
+sub tcp_scan {
+        my ($host, $port) = @_;
+        my $test = IO::Socket::INET->new("PeerAddr" => $host,
+                "PeerPort" => $port, "Proto" => "tcp", "Timeout" => "5");
+ 
+        # If the test succeeded, return 1
+        return ($test) ? 1 : 0;
+}
+
+if ($#ARGV != 1) {
+        errout "Usage: $0 host port";
+}
+ 
+# --------------------------------------------------------------------------- #
+#               MAIN LOGIC
+# --------------------------------------------------------------------------- #
+
+my $host = $ARGV[0];
+my $port = $ARGV[1];
+
+if($host =~ /[A-Za-z]/) {
+        &test_name_resolution($host);
+} else {
+        &test_ip_value($host);
+}
+
+&test_port_value($port);
+ 
+print "Probing $host, TCP port $port... ";
+ 
+if(&tcp_scan($host, $port)) {
+        print "open\n";
+        exit 0
+} else {
+        print "closed\n";
+        exit 1
+}

@@ -1,0 +1,50 @@
+###############################################################################
+# Install simple utilities to help with system administration.
+###############################################################################
+
+bundle agent a31_local_utils
+{
+
+meta:
+
+    "tags" slist => { "autorun" };
+
+methods:
+
+    gc_supported_os::
+    "a31utils" usebundle => a31_local_utils_run;
+
+}
+
+bundle agent a31_local_utils_run
+{
+
+vars:
+
+    "s_dir" string  => "$(gv.scripts)";
+
+    "s_utils" slist => { "json-valid", "port-scan" };
+
+files:
+
+    "/usr/local/bin/$(s_utils)"
+    handle          => "a31h_local_bin",
+    create          => "true",
+    perms           => mog("755","root","root"),
+    copy_from       => local_dcp("$(s_dir)/util-$(s_utils).txt"),
+    classes         => if_repaired("a31c_utils_fixed");
+
+    "/usr/local/sbin/$(s_utils)"
+    handle          => "a31h_local_sbin",
+    depends_on      => { "a31h_local_bin" },
+    link_from       => ln_s("/usr/local/bin/$(s_utils)"),
+    move_obstructions => "true",
+    classes         => if_repaired("a31c_utils_fixed");
+
+commands:
+
+    a31c_utils_fixed::
+    "$(gv.log_notice)"
+    args => "Installed local utilities";
+
+}

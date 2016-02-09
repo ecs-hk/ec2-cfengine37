@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Managed by CFEngine
+
+PATH=/usr/bin:/bin
+
+if [ -z "${1}" ] || [ ! -f "${1}" ] ; then
+        printf '%s\n' "Usage: ${0##*/} inputfile.json"
+        exit 1
+fi
+
+python -m json.tool < "${1}"
+
+if [ ${?} -ne 0 ] ; then
+        printf '%s\n%s\n%s\n'           \
+                "=====================" \
+                "JSON no good. Fix it." \
+                "====================="
+fi
+
+exit 0
