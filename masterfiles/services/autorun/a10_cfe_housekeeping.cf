@@ -30,11 +30,20 @@ vars:
     "glob04" string => "/etc/logrotate.d/*.cf-before-edit";
     "glob05" string => "/etc/rsyslog.d/*.cfsaved";
     "glob06" string => "/etc/rsyslog.d/*.cf-before-edit";
+    "glob07" string => "/etc/yum.repos.d/*.cfsaved";
+    "glob08" string => "/etc/yum.repos.d/*.cf-before-edit";
+    "glob09" string => "/usr/local/etc/*.cfsaved";
+    "glob10" string => "/usr/local/etc/*.cf-before-edit";
+    "glob11" string => "/usr/local/bin/*.cfsaved";
+    "glob12" string => "/usr/local/bin/*.cf-before-edit";
     
     # And filefiles() appears to want a list of strings rather than
-    # and slist.
+    # an slist.
     "cruft" slist  => findfiles("$(glob01)","$(glob02)","$(glob03)",
-                                "$(glob04)","$(glob05)","$(glob06)");
+                                "$(glob04)","$(glob05)","$(glob06)",
+                                "$(glob07)","$(glob08)","$(glob09)",
+                                "$(glob10)","$(glob11)","$(glob12)"
+                               	);
 
 files:
 
