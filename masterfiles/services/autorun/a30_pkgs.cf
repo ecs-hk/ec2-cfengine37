@@ -24,15 +24,23 @@ bundle agent a30_conf_run
 
 vars:
 
-    "s_dir" string  => "$(gv.text)";
+    "s_tdir" string  => "$(gv.text)";
+
+    "s_mdir" string  => "$(gv.mustache)";
+
+    gc_el6::
+    "s_key" string  => "RPM-GPG-KEY-EPEL-6";
+
+    gc_el7::
+    "s_key" string  => "RPM-GPG-KEY-EPEL-7";
 
 files:
 
-    "/etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-6"
+    "/etc/pki/rpm-gpg/$(s_key)"
     handle          => "a30h_pkg_epel_key",
     create          => "true",
     perms           => mog("0644","root","root"),
-    copy_from       => local_dcp("$(s_dir)/RPM-GPG-KEY-EPEL-6.txt"),
+    copy_from       => local_dcp("$(s_tdir)/$(s_key).txt"),
     classes         => if_repaired("a30c_fixed_epel"); 
 
     "/etc/yum.repos.d/epel.repo"
@@ -40,7 +48,8 @@ files:
     depends_on      => { "a30h_pkg_epel_key" },
     create          => "true",
     perms           => mog("0644","root","root"),
-    copy_from       => local_dcp("$(s_dir)/epel.repo.txt"),
+    edit_template   => "$(s_mdir)/epel.repo.mustache",
+    template_method => "mustache",
     classes         => if_repaired("a30c_fixed_epel"); 
 
 commands:
