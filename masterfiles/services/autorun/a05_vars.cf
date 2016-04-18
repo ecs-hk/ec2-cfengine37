@@ -28,6 +28,9 @@ vars:
     # Detect and set $(os) variable, which is used to determine whether
     # the promises in this project run at all.
 
+    amzn_2016_03::
+    "os" string => "amzn_2016_03";
+
     amzn_2015_09::
     "os" string => "amzn_2015_09";
 
