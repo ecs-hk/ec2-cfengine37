@@ -7,12 +7,12 @@ Baseline promises for managing AWS EC2 instances. Performs sshd, ntpd, and rsysl
 (Also see "Optional features" section below.)
 
 Supported OSes:
+* Amazon Linux AMI release 2016.03
 * Amazon Linux AMI release 2015.09
-* RHEL 6
 * RHEL 7
+* RHEL 6
 
-Tested with packages:
-* `cfengine-community-3.7.1-1.x86_64.rpm`
+Designed for cfengine-community-3.7.*
 
 Official CFEngine packages:
 https://cfengine.com/product/community/
