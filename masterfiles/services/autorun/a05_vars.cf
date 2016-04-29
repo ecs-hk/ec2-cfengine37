@@ -82,7 +82,7 @@ vars:
     # Set variables for process patterns and service manipulation
     # commands, which will be used by our service management promises.
 
-    amzn_2015_09::
+    amzn_2016_03|amzn_2015_09::
     "p[crond]" string => "\bcrond\b";
     "p[mta]" string => "\bsendmail.\saccepting\sconnections\b";
     "p[ntpd]" string => "\bntpd\b";
