@@ -1,0 +1,2 @@
+# Managed by CFEngine
+preserve_hostname: true

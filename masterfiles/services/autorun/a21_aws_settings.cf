@@ -1,0 +1,48 @@
+###############################################################################
+# Set up AWS cloud configuration - currently just preserves hostname changes
+###############################################################################
+
+bundle agent a21_aws_settings
+{
+
+meta:
+
+    "tags" slist => { "autorun" };
+
+methods:
+
+    gc_supported_os::
+    "a21awscfg" usebundle => a21_aws_settings_run;
+
+}
+
+bundle agent a21_aws_settings_run
+{
+
+vars:
+
+    "s_dir" string  => "$(gv.text)";
+
+    "s_conf" string => "aws-cfg-hostname.txt";
+
+classes:
+
+    "a21c_conf_ready" expression => fileexists("/etc/cloud/cloud.cfg.d");
+
+files:
+
+    a21c_conf_ready::
+    "/etc/cloud/cloud.cfg.d/90_hostname.cfg"
+    handle          => "a21h_hostname",
+    create          => "true",
+    perms           => mog("644","root","root"),
+    copy_from       => local_dcp("$(s_dir)/$(s_conf)"),
+    classes         => if_repaired("a21c_fixed");
+
+commands:
+
+    a21c_fixed::
+    "$(gv.log_notice)"
+    args => "Fixed AWS cloud init's configuration";
+
+}
