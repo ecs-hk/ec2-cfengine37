@@ -24,27 +24,34 @@ bundle common a06_set_global_classes
 
 classes:
 
+    # This class is set to true when all the conditions chained
+    # together are ready for the regular promises to begin running.
+
+    "gc_agent_ready" and => { "gc_supported_os", "gc_localconf_found" };
+
+    # Supported OS detection.
+
     "gc_supported_os" expression => not(strcmp("$(gv.os)",""));
+
+    "gc_amzn" or => { "amzn_2016_03", "amzn_2015_09" };
 
     "gc_el6" or => { "amzn_2016_03", "amzn_2015_09", "redhat_6" };
 
     "gc_el7" or => { "redhat_7" };
 
-    # If the agent system has specified that security updates should
-    # be automatically installed, set this class.
+    # Local CFEngine configuration detection.
+
+    "gc_localconf_found" expression => fileexists("$(gv.localconf_file)");
+
+    # Classes based on local CFEngine configuration settings.
 
     "gc_security_pkg_auto_install" expression =>
-            strcmp("$(gv.localconf[securityUpdates])","install");
-
-    # If the agent system has specified that sshd(8) should allow
-    # password authentication (which this ruleset disables by default),
-    # then set this class.
+            strcmp("$(gv.localconf[securityUpdates])","enable");
 
     "gc_enable_ssh_password_auth" expression =>
             strcmp("$(gv.localconf[sshdPasswordAuth])","enable");
 
-    # AWS CLI is bundled with Amazon Linux AMIs already, but we do this
-    # check for all OSes, since we rely on it.
+    # AWS CLI detection.
 
     "gc_aws_cli_installed" or => { fileexists("/usr/bin/aws"),
                                    fileexists("/usr/local/bin/aws"),

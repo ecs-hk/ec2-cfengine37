@@ -11,7 +11,7 @@ meta:
 
 methods:
 
-    gc_supported_os::
+    gc_agent_ready::
     "a11motd" usebundle => a11_cfe_motd_run;
 
 }

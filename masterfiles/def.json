@@ -20,6 +20,6 @@
             "192.168.0.0/16"
         ],
         "agentfacility": "LOG_LOCAL3",
-        "domain": "ec2.local"
+        "domain": "localdomain"
     }
 }

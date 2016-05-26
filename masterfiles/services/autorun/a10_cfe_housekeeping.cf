@@ -12,7 +12,7 @@ meta:
 
 methods:
 
-    gc_supported_os::
+    gc_agent_ready::
     "a10housekeep" usebundle => a10_cfe_housekeeping_run;
 
 }

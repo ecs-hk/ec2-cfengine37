@@ -27,34 +27,45 @@ GSSAPIAuthentication no
 UsePAM yes
 
 # Mustache derived based on global classes - begin ---------------------------
+{{!
+}}
 {{#classes.gc_enable_ssh_password_auth}}
 PasswordAuthentication yes
 {{/classes.gc_enable_ssh_password_auth}}
-
+{{!
+}}
 {{^classes.gc_enable_ssh_password_auth}}
 PasswordAuthentication no
 {{/classes.gc_enable_ssh_password_auth}}
+{{!
+}}
 # Mustache derived based on global classes - end -----------------------------
 
 # Mustache derived based on OS - begin ---------------------------------------
-{{#classes.amzn_2015_09}}
+{{!
+}}
+{{#classes.gc_amzn}}
 UsePrivilegeSeparation sandbox
 HostKey /etc/ssh/ssh_host_rsa_key
 HostKey /etc/ssh/ssh_host_ecdsa_key
 HostKey /etc/ssh/ssh_host_ed25519_key
-{{/classes.amzn_2015_09}}
-
+{{/classes.gc_amzn}}
+{{!
+}}
 {{#classes.redhat_7}}
 UsePrivilegeSeparation sandbox
 HostKey /etc/ssh/ssh_host_rsa_key
 HostKey /etc/ssh/ssh_host_ecdsa_key
 HostKey /etc/ssh/ssh_host_ed25519_key
 {{/classes.redhat_7}}
-
+{{!
+}}
 {{#classes.redhat_6}}
 UsePrivilegeSeparation yes
 HostKey /etc/ssh/ssh_host_rsa_key
 {{/classes.redhat_6}}
+{{!
+}}
 # Mustache derived based on OS - end -----------------------------------------
 
 Banner /etc/ssh/banner
@@ -66,4 +77,4 @@ AcceptEnv LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT
 AcceptEnv LC_IDENTIFICATION LC_ALL LANGUAGE
 AcceptEnv XMODIFIERS
 
-Subsystem sftp	/usr/libexec/openssh/sftp-server
+Subsystem sftp internal-sftp

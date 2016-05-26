@@ -11,7 +11,7 @@ meta:
 
 methods:
 
-    gc_supported_os::
+    gc_agent_ready::
     "a61mta" usebundle => a61_mta_run;
 
 }

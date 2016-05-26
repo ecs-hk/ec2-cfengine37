@@ -12,7 +12,7 @@ meta:
 
 methods:
 
-    gc_supported_os::
+    gc_agent_ready::
     "a16rsys" usebundle => a16_cfe_rsyslog_run;
 
     "a16rsmy" usebundle => a16_cfe_rsyslog_mysql_run;

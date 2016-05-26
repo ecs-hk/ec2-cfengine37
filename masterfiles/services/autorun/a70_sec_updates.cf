@@ -11,7 +11,7 @@ meta:
 
 methods:
 
-    gc_supported_os::
+    gc_agent_ready::
     "a70secpkgs" usebundle => a70_sec_updates_run;
 
 }

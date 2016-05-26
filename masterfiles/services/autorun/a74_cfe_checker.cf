@@ -11,7 +11,7 @@ meta:
 
 methods:
 
-    gc_supported_os::
+    gc_agent_ready::
     "a74cfecheck" usebundle => a74_cfe_checker_run;
 
 }

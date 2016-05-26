@@ -11,7 +11,7 @@ meta:
 
 methods:
 
-    gc_supported_os::
+    gc_agent_ready::
     "a51ntpd" usebundle => a51_ntpd_run;
 
 }

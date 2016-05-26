@@ -11,12 +11,12 @@ meta:
 
 methods:
 
-    gc_supported_os::
+    gc_agent_ready::
     "a72s3bkup" usebundle => a72_s3_bkup_script_run;
 
     "a72s3key" usebundle => a72_s3_key_run;
 
-    "a72s3cb" usebundle => a72_s3_creds_and_bucket_run;
+    "a72s3cb" usebundle => a72_s3_creds_run;
 
 }
 
@@ -77,7 +77,7 @@ commands:
 
 }
 
-bundle agent a72_s3_creds_and_bucket_run
+bundle agent a72_s3_creds_run
 {
 
 # The /root/.aws file promises have a similar effect as running the
@@ -93,8 +93,6 @@ vars:
     "s_json" string => "bkup-to-s3-creds.json";
 
     "s_cconf" string => "aws-credentials.mustache";
-
-    "s_econf" string => "aws-env.mustache";
 
 classes:
 
@@ -119,23 +117,10 @@ files:
     template_data   => readjson("$(s_secdir)/$(s_json)", 50000),
     classes         => if_repaired("a72c_aws_conf_fixed");
 
-    "/usr/local/etc/bkup-to-s3.env"
-    handle          => "a72h_aws_env",
-    create          => "true",
-    perms           => mog("600","root","root"),
-    edit_template   => "$(s_mdir)/$(s_econf)",
-    template_method => "mustache",
-    template_data   => readjson("$(s_secdir)/$(s_json)", 50000),
-    classes         => if_repaired("a72c_aws_env_fixed");
-
 commands:
 
     a72c_aws_conf_fixed::
     "$(gv.log_notice)"
     args => "Fixed AWS CLI config for root";
-
-    a72c_aws_env_fixed::
-    "$(gv.log_notice)"
-    args => "Fixed AWS environment file for S3 backups";
 
 }

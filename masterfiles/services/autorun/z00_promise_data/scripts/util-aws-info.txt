@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# Managed by CFEngine
+
+_uri='http://169.254.169.254/latest/meta-data'
+
+_attrs='
+	instance-id
+	instance-type
+	local-hostname
+	local-ipv4
+	public-hostname
+	public-ipv4
+	security-groups
+	'
+
+for _i in ${_attrs} ; do
+
+	_o="$(curl -s ${_uri}/${_i})"
+
+	if [ ${?} -ne 0 ] ; then
+		printf '%s\n' 'Problem retrieving AWS data'
+		exit 1
+	fi
+
+	for _r in ${_o} ; do
+
+		printf '%-17s %s\n' "${_i}" "${_r}"
+
+	done
+
+done
+
+exit 0

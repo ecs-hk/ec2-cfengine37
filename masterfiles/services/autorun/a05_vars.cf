@@ -19,10 +19,6 @@ methods:
 bundle agent gv
 {
 
-classes:
-
-    "localconf_found" expression => fileexists("/usr/local/etc/cfengine.json");
-
 vars:
 
     # Detect and set $(os) variable, which is used to determine whether
@@ -40,16 +36,11 @@ vars:
     redhat_7::
     "os" string => "redhat_7";
 
-    localconf_found::
+    any::
+    "localconf_file" string => "/usr/local/etc/cfengine.json";
 
-    # localconf is a JSON file that contains host-specific configuration
-    # data. Example configuration info could be:
-    #   {
-    #     "role":"webserver",
-    #     "securityUpdates":"install"
-    #   }
-
-    "localconf" data => readjson("/usr/local/etc/cfengine.json", 50000);
+    gc_localconf_found::
+    "localconf" data => readjson("$(localconf_file)", 50000);
 
     any::
 

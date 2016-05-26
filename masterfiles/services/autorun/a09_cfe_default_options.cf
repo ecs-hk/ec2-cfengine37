@@ -1,0 +1,41 @@
+###############################################################################
+# Install a default CFEngine local options file - if it doesn't exist already.
+###############################################################################
+
+bundle agent a09_cfe_default_options
+{
+
+meta:
+
+    "tags" slist => { "autorun" };
+
+methods:
+
+    gc_supported_os.!gc_localconf_found::
+    "a09defoptions" usebundle => a09_cfe_default_options_run;
+
+}
+
+bundle agent a09_cfe_default_options_run
+{
+
+vars:
+
+    "s_dir" string  => "$(gv.json)";
+
+files:
+
+    "$(gv.localconf_file)"
+    handle          => "a09h_localconf",
+    create          => "true",
+    perms           => mog("644","root","root"),
+    copy_from       => local_dcp("$(s_dir)/cfengine-defaults.json"),
+    classes         => if_repaired("a09c_default_localconf_installed");
+
+commands:
+
+    a09c_default_localconf_installed::
+    "$(gv.log_alert)"
+    args => "Installed a default $(gv.localconf_file) configuration";
+
+}

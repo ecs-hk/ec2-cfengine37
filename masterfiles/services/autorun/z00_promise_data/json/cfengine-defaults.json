@@ -1,0 +1,11 @@
+{
+    "backup": "disable",
+    "backupDirectories": [
+        "/root",
+        "/etc",
+        "/usr/local/etc"
+    ],
+    "backupS3Bucket": "my.org.changethis.bkups",
+    "securityUpdates": "disable",
+    "sshdPasswordAuth": "disable"
+}

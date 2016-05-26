@@ -16,15 +16,7 @@
         "iperf", 
         "curl", 
         "unzip", 
+        "jq", 
         "bash-completion"
-    ], 
-    "amzn_2015_09": [
-        "util-linux"
-    ], 
-    "redhat_6": [
-        "util-linux-ng"
-    ],
-    "redhat_7": [
-        "util-linux"
     ] 
 }

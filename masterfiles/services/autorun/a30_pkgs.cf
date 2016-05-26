@@ -12,7 +12,7 @@ meta:
 
 methods:
 
-    gc_supported_os::
+    gc_agent_ready::
     "a30confrun" usebundle => a30_conf_run;
 
     "a30pkgrun" usebundle => a30_pkg_run;
@@ -71,7 +71,12 @@ vars:
 
     "baseline_pkgs" slist => getvalues("json_data[all_servers]");
 
-    "os_specific_pkgs" slist => getvalues("json_data[$(gv.os)]");
+    # Weird package name exceptions can be hardcoded here as needed.
+
+    "os_specific_pkgs" slist => { "util-linux" };
+
+    redhat_6::
+    "os_specific_pkgs" slist => { "util-linux-ng" };
 
 packages:
 

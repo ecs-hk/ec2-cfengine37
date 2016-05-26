@@ -11,7 +11,7 @@ meta:
 
 methods:
 
-    gc_supported_os::
+    gc_agent_ready::
     "a21awscfg" usebundle => a21_aws_settings_run;
 
 }

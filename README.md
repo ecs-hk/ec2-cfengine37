@@ -1,95 +1,86 @@
 # CFEngine 3.7 promises for Amazon EC2
 
+
 ## Synopsis
 
-Baseline promises for managing AWS EC2 instances. Performs sshd, ntpd, and rsyslog configuration, keeps important services running, watches filesystem space, and checks for package security updates.
+Baseline cfengine-community-3.7.* promises for managing AWS EC2 instances. Performs sshd, ntpd, and rsyslog configuration, keeps important services running, watches filesystem space, and checks for package security updates.
 
-(Also see "Optional features" section below.)
+(Also see "Optional features" section below. Promises can optionally back up filesystems to S3 and send syslog to RDS.)
 
 Supported OSes:
-* Amazon Linux AMI release 2016.03
-* Amazon Linux AMI release 2015.09
-* RHEL 7
-* RHEL 6
+* Amazon Linux AMI releases 2015.09, 2016.03
+* RHEL 6, RHEL 7
 
-Designed for cfengine-community-3.7.*
 
-Official CFEngine packages:
-https://cfengine.com/product/community/
+## Quick note on JSON configuration files
+
+Always, **always** validate your JSON after editing it, or else CFEngine promises will break on and/or ignore invalid JSON. This promise ruleset installs a simple utility for doing so.
+
+```
+# json-valid my-conf.json
+```
+
 
 ## Deploy to CFEngine hub
 
-### One-time install and setup
+To get started on a new hub system, install the [CFEngine package](https://cfengine.com/product/community/) and clone this git repository.
 
-On the hub system, install the CFEngine package and clone this git repository. Then:
+Next, perform the following steps (replacing 172.31.15.0 with your hub's VPC internal IP address).
 
 ```
 # cp -r ./ec2-cfengine37/masterfiles/* /var/cfengine/masterfiles
-
 # cp -r /var/cfengine/masterfiles/* /var/cfengine/inputs
-
 # service cfengine3 restart
+# cf-agent --bootstrap 172.31.15.0
 ```
 
-### Customize for your environment
+(Remember to add a rule to your EC2 Security Group to allow in TCP 5308 from your VPC.)
 
-Edit vars.acl in `/var/cfengine/masterfiles/def.json` to include subnets you wish to allow in.
-
-Always, **always** validate your JSON after editing it, or else CFEngine will silently ignore it.
-
-```
-# python -m json.tool < def.json
-```
-
-You will also need to add a rule to your EC2 Security Group to allow in TCP 5308 from CFEngine agents to the CFEngine hub.
-
-### Bootstrap to yourself
-
-This bootstrapping step will put the hub under CFEngine management, just like all managed agents.
-
-```
-# cf-agent --bootstrap 172.31.21.122
-```
-
-Use the IP address of your CFEngine hub instead of the above.
 
 ## Deploy to CFEngine agent
 
-### One-time install, then bootstrap to the hub
-
-On each agent system, install the CFEngine package. Then:
+As you launch new EC2 instances, use the following in Configure Instance Details -> Advanced Details -> User Data:
 
 ```
-# cf-agent --bootstrap 172.31.21.122
+#!/bin/bash
+yum -y install https://s3-us-xyz.amazonaws.com/my.org.packages/cfengine-community-3.7.3-1.x86_64.rpm
+/var/cfengine/bin/cf-agent --bootstrap 172.31.15.0
 ```
 
-Use the IP address of your CFEngine hub instead of the above.
+* Replace the https URI with the URI for a cfengine-community-3.7 package. (Be polite and copy a package to your own S3 bucket, then refer to it in EC2 User Data.)
+* Replace 172.31.15.0 with your hub's VPC internal IP address
+
 
 ---
 
+
 # Optional features
 
-Optional features are _not_ enabled by default. Each requires one or more steps to activate.
 
-## Automatic installation of package security updates
+## Tweaking promise behavior
 
-By default, this promise collection warns (via logging) when package security updates are available. To install the package security updates automatically, create or edit the file `/usr/local/etc/cfengine.json` on each CFEngine hub system where the auto-install is desired. Populate it with the following:
-
-```
-{
-    "securityUpdates": "install"
-}
-```
-
-## Enable sshd(8) password authentication
-
-By default, this promise collection enables sshd(8) pubkey authentication and disables all other authentication forms. To also enable password authentication, create or edit the file `/usr/local/etc/cfengine.json` on each CFEngine hub system where it's desired. Populate it with the following:
+Configurable per-agent (per-EC2 instance) features are managed in the `/usr/local/etc/cfengine.json` configuration file. The default that's installed if none exists contains:
 
 ```
 {
-    "sshdPasswordAuth": "enable"
+    "backup": "disable",
+    "backupDirectories": [
+        "/root",
+        "/etc",
+        "/usr/local/etc"
+    ],
+    "backupS3Bucket": "my.org.changethis.bkups",
+    "securityUpdates": "disable",
+    "sshdPasswordAuth": "disable"
 }
 ```
+
+* "backup": controls whether backups run (enable|disable)
+* "backupDirectories": local directories that will be pushed to S3
+* "backupS3Bucket": name of S3 bucket to push backups to
+* "securityUpdates" controls whether `yum --security` packages are automatically installed (enable|disable)
+* "sshdPasswordAuth" controls whether password authentication is enabled in `sshd_config` (enable|disable)
+
 
 ## Push encrypted backups (tarballs) to AWS S3
 
@@ -97,26 +88,12 @@ Automatic (encrypted) backups can be activated by completing the following steps
 
 ### One-time AWS setup
 
-1. Using AWS S3, create a bucket for encrypted backups. Note that [S3 bucket names must be globally-unique](http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html) (across all customer accounts!), so utilize a consistent prefix or suffix to help ensure uniqueness, e.g. `s3://my.org.encbkups/`
-2. Using AWS IAM, create an account via IAM with appropriate permissions to write to the S3 bucket.
+1. Using AWS S3, create a bucket for backups. Note that [S3 bucket names must be globally-unique](http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html) (across all customer accounts!), so utilize a consistent prefix or suffix to help ensure uniqueness, e.g. `s3://my.org.encbkups/`
+2. Using AWS IAM, create a service account via IAM with permissions to write to the S3 bucket.
+3. On the CFEngine hub, create the file `masterfiles/services/autorun/z01_secrets/bkup-to-s3-creds.json` using the new IAM service account credentials.
+4. On the CFEngine hub, create the file `masterfiles/services/autorun/z01_secrets/bkup-to-s3.key.txt` - and put a **strong** file encryption key inside it. This key will be used to AES-encrypt (and decrypt, if/when needed) your backup tarballs.
+5. On each CFEngine agent system, modify "backup*" values in `/usr/local/etc/cfengine.json` as needed.
 
-### One-time CFEngine hub setup
-
-1. Create the file `masterfiles/services/autorun/z01_secrets/bkup-to-s3.key.txt` - and put a **strong** file encryption key inside it. This key will be used to AES-encrypt (and decrypt, if/when needed) your backup tarballs.
-2. Create the file `masterfiles/services/autorun/z01_secrets/bkup-to-s3-creds.json` using the new IAM credentials and the name of the bucket you created.
-
-### Setup on each CFEngine agent
-
-1. Determine which directories should be backed up.
-2. Create the file `/usr/local/etc/bkup-to-s3.list` - with a list of those directories, a la:
-
-```
-/etc
-/var/www
-/var/lib/openldap
-```
-
-The directories you specify will be all rolled into a single tarball, AES-encrypted, and then pushed to your S3 bucket. The encrypted tarball will be named after the agent hostname.
 
 ## Promise logging to a MySQL DB (e.g. AWS RDS)
 
@@ -196,4 +173,4 @@ Configure `rsyslog-mysql-creds.json` using the account with INSERT privileges so
 
 ### Simple DB log viewer
 
-Optionally, you can use the [simple-ommysql-viewer](https://github.com/ecs-hk/simple-ommysql-viewer) app to view log entries.
+Check out the [simple-ommysql-viewer](https://github.com/ecs-hk/simple-ommysql-viewer) app to view log entries.

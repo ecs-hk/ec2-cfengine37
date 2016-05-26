@@ -11,7 +11,7 @@ meta:
 
 methods:
 
-    gc_supported_os::
+    gc_agent_ready::
     "a31utils" usebundle => a31_local_utils_run;
 
 }
@@ -23,7 +23,7 @@ vars:
 
     "s_dir" string  => "$(gv.scripts)";
 
-    "s_utils" slist => { "json-valid", "port-scan" };
+    "s_utils" slist => { "aws-info", "json-valid", "port-scan" };
 
 files:
 

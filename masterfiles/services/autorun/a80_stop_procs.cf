@@ -13,7 +13,7 @@ methods:
 
     # Only relevant on Amazon's EL6-based AMIs.
 
-    gc_supported_os.gc_el6::
+    gc_agent_ready.gc_el6::
     "a80nfs" usebundle => a80_nfs_run;
 
 }

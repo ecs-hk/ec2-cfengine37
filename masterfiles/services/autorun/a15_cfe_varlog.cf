@@ -11,7 +11,7 @@ meta:
 
 methods:
 
-    gc_supported_os::
+    gc_agent_ready::
     "a15logr" usebundle => a15_cfe_varlog_run;
 
 }

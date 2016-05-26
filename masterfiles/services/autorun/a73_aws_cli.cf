@@ -14,7 +14,7 @@ meta:
 
 methods:
 
-    gc_supported_os::
+    gc_agent_ready::
     "a73awscli" usebundle => a73_aws_cli_run;
 
 }

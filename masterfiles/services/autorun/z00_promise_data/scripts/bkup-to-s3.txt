@@ -2,11 +2,8 @@
 
 # Managed by CFEngine
 
-# This cronjob tars, compresses, and encrypts directories, then pushes them
-# to AWS S3 - if:
-#   1) aws CLI is configured for the EUID running the script; and
-#   2) an encryption key file is found; and
-#   3) a file containing directories to back up is found.
+# This cronjob tars, compresses, and encrypts named directories, then
+# attempts to push them to AWS S3.
 #
 # To decrypt backed-up, encrypted tarballs, use:
 #   openssl enc -aes128 -in $infile -out $outfile -d -a
@@ -23,8 +20,7 @@ readonly _me="${0##*/}"
 readonly _output="/tmp/${_me}.log"
 
 readonly _key='/usr/local/etc/bkup-to-s3.key'
-readonly _env='/usr/local/etc/bkup-to-s3.env'
-readonly _bkup_list='/usr/local/etc/bkup-to-s3.list'
+readonly _json_conf='/usr/local/etc/cfengine.json'
 
 # ------------------------------------------------------------------------- #
 #			FUNCTIONS
@@ -40,8 +36,8 @@ errout() {
 }
 
 noticeout() {
-	# Not an error condition. Log to a non-scary syslog level,
-	# and get out quietly.
+	# Not an error condition. Backups just haven't been configured
+	# yet. Log to a non-scary syslog level, and get out quietly.
 
 	local _msg="${_me}: ${1}"
 
@@ -51,23 +47,39 @@ noticeout() {
 	exit 0
 }
 
-audits() {
-	if [ "$(whoami)" != "root" ] ; then
-		errout "I only run as root"
+audit_basic_operation() {
+	if [ ! -e "${_json_conf}" ] ; then
+		errout "CFEngine JSON config is missing"
 	fi
 
+	jq '.' "${_json_conf}" > /dev/null 2>&1
+
+	if [ ${?} -ne 0 ] ; then
+		errout "CFEngine JSON config is broken"
+	fi
+}
+
+check_whether_backups_should_run() {
+	local _test="$(jq -r '.backup' ${_json_conf})"
+
+	if [ "${_test}" == "enable" ] ; then
+		return
+	else
+		noticeout "Backups are not enabled"
+	fi
+}
+
+audit_encryption_key() {
 	if [ ! -e "${_key}" ] ; then
-		noticeout "No key file found. Backups will not run."
+		errout "No encryption key file found"
 	fi
 	
-	if [ ! -e "${_env}" ] ; then
-		noticeout "No env file found. Backups will not run."
+	if [ $(stat -c %s ${_key}) -lt 20 ] ; then
+		errout "Encryption key looks too short"
 	fi
-	
-	if [ ! -e "${_bkup_list}" ] ; then
-		noticeout "No backup list found. Backups will not run."
-	fi
+}
 
+audit_aws_cli() {
 	aws s3 help >/dev/null 2>&1
 	if [ ${?} -ne 0 ] ; then
 		errout "aws CLI test returned an error"
@@ -78,7 +90,29 @@ audits() {
 	fi
 }
 
-set_bkup_name() {
+set_s3_bucket_name() {
+	readonly _s3_bucket="$(jq -r '.backupS3Bucket' ${_json_conf})"
+
+	if [ -z "${_s3_bucket}" ] || [ "${_s3_bucket}" == "null" ] ; then
+		errout "S3 bucket is not set in ${_json_conf}"
+	fi
+}
+
+set_bkup_input_list() {
+	readonly _bkup_list="$(jq -r '.backupDirectories[]' ${_json_conf})"
+
+	if [ -z "${_bkup_list}" ] ; then
+		errout "Directories to backup not set in ${_json_conf}"
+	fi
+
+	for _i in ${_bkup_list} ; do
+		if [ ! -e "${_i}" ] ; then
+			errout "${_i} cannot be backed up (does not exist)"
+		fi
+	done
+}
+
+set_bkup_output_file_name() {
 	# The backup name is set so that a rolling twelve months and a
 	# rolling ~thirty days are kept in AWS S3 for each unique hostname.
 
@@ -95,43 +129,32 @@ set_bkup_name() {
 	readonly _bkup_name="${_b}"
 }
 
-build_list_of_files() {
-	# Just be reasonable, and don't put annoying filenames into your
-	# backup list (e.g. files that start with "-", files with spaces
-	# in the name). If you're backing up such files, then specify
-	# the parent directory instead.
-
-	local _f
-	local _list
-
-	while read _f ; do
-		_list="${_list} ${_f}"
-	done < "${_bkup_list}"
-
-	if [ -z "${_list}" ] ; then
-		errout "Nothing specified for me to back up"
-	fi
-
-	readonly _list_of_files="${_list}"
-}
-
 # ------------------------------------------------------------------------- #
 #			MAIN LOGIC
 # ------------------------------------------------------------------------- #
 
-audits
-set_bkup_name
-build_list_of_files
+if [ "$(whoami)" != "root" ] ; then
+	errout "I only run as root"
+fi
 
-. "${_env}"
+audit_basic_operation
+
+check_whether_backups_should_run
+
+audit_encryption_key
+audit_aws_cli
+
+set_s3_bucket_name
+set_bkup_input_list
+set_bkup_output_file_name
 
 cp /dev/null "${_output}"
 
-tar cfz - ${_list_of_files}						\
+tar cfz - ${_bkup_list}							\
 2>> "${_output}"							|
 openssl enc -aes128 -salt -pass file:"${_key}" -e -a			\
 2>> "${_output}"							|
-aws s3 cp - s3://"${S3_BUCKET}"/"${_bkup_name}.tgz.enc"			\
+aws s3 cp - s3://"${_s3_bucket}"/"${_bkup_name}.tgz.enc"		\
 >> "${_output}" 2>&1
 
 if [ ${?} -ne 0 ] ; then

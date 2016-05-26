@@ -11,7 +11,7 @@ meta:
 
 methods:
 
-    gc_supported_os::
+    gc_agent_ready::
     "a50sshd" usebundle => a50_sshd_run;
 
 }

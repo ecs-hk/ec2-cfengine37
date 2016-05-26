@@ -11,7 +11,7 @@ meta:
 
 methods:
 
-    gc_supported_os::
+    gc_agent_ready::
     "a20rootenv" usebundle => a20_root_env_run;
 
 }
