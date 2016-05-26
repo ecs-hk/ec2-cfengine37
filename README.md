@@ -25,7 +25,7 @@ Always, **always** validate your JSON after editing it, or else CFEngine promise
 
 To get started on a new hub system, install the [CFEngine package](https://cfengine.com/product/community/) and clone this git repository.
 
-Next, perform the following steps (replacing 172.31.15.0 with your hub's VPC internal IP address).
+Next, perform the following steps:
 
 ```
 # cp -r ./ec2-cfengine37/masterfiles/* /var/cfengine/masterfiles
@@ -34,7 +34,8 @@ Next, perform the following steps (replacing 172.31.15.0 with your hub's VPC int
 # cf-agent --bootstrap 172.31.15.0
 ```
 
-(Remember to add a rule to your EC2 Security Group to allow in TCP 5308 from your VPC.)
+* Replace 172.31.15.0 with your hub's VPC internal IP address (i.e. bootstrap to yourself).
+* Remember to add a rule to your EC2 Security Group to allow in TCP 5308 from your VPC.
 
 
 ## Deploy to CFEngine agent
@@ -75,11 +76,11 @@ Configurable per-agent (per-EC2 instance) features are managed in the `/usr/loca
 }
 ```
 
-* "backup": controls whether backups run (enable|disable)
-* "backupDirectories": local directories that will be pushed to S3
-* "backupS3Bucket": name of S3 bucket to push backups to
-* "securityUpdates" controls whether `yum --security` packages are automatically installed (enable|disable)
-* "sshdPasswordAuth" controls whether password authentication is enabled in `sshd_config` (enable|disable)
+* backup: controls whether backups run ("enable"|"disable")
+* backupDirectories: local directories that will be pushed to S3
+* backupS3Bucket: name of S3 bucket to push backups to
+* securityUpdates: controls whether `yum --security` packages are automatically installed ("enable"|"disable")
+* sshdPasswordAuth: controls whether password authentication is enabled in `sshd_config` ("enable"|"disable")
 
 
 ## Push encrypted backups (tarballs) to AWS S3
