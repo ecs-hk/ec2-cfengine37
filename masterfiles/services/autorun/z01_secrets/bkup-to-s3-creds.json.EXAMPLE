@@ -1,6 +1,4 @@
 {
     "access": "AAABBBCCC",
-    "bucketName": "my.org.encbkups",
-    "comment": "Please note that S3 bucket names must be unique across all of S3! This means you should use some sort of org qualifying prefix or suffix. Attempts to create an already existing bucket (owned by another AWS user) will be blocked by S3.",
     "secret": "secret+key"
 }
