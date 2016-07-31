@@ -1,6 +1,8 @@
 ###############################################################################
-# Clean up any CFEngine-generated files from directories that could cause
-# unpleasant side-effects.
+# Various CFEngine housekeeping tasks:
+# - Delete files that were (but are no longer) CFE managed.
+# - Clean up leftover CFE-generated cruft following edits by promises.
+# - Maintain usefule sysadmin symlinks related to CFE.
 ###############################################################################
 
 bundle agent a10_cfe_housekeeping
@@ -13,48 +15,53 @@ meta:
 methods:
 
     gc_agent_ready::
-    "a10housekeep" usebundle => a10_cfe_housekeeping_run;
+    "a10rmunmanaged" usebundle => a10_cfe_rm_unmanaged;
+    "a10rmcruft" usebundle => a10_cfe_rm_cruft;
+    "a10symlink" usebundle => a10_cfe_symlink;
 
 }
 
-bundle agent a10_cfe_housekeeping_run
+bundle agent a10_cfe_rm_unmanaged
 {
 
 vars:
 
-    # Pretty silly to hardcode all this, but the {baz,boo} globbing
-    # does not appear to be working correctly.
-    "glob01" string => "/etc/cron.*/*.cfsaved";
-    "glob02" string => "/etc/cron.*/*.cf-before-edit";
-    "glob03" string => "/etc/logrotate.d/*.cfsaved";
-    "glob04" string => "/etc/logrotate.d/*.cf-before-edit";
-    "glob05" string => "/etc/rsyslog.d/*.cfsaved";
-    "glob06" string => "/etc/rsyslog.d/*.cf-before-edit";
-    "glob07" string => "/etc/yum.repos.d/*.cfsaved";
-    "glob08" string => "/etc/yum.repos.d/*.cf-before-edit";
-    "glob09" string => "/usr/local/etc/*.cfsaved";
-    "glob10" string => "/usr/local/etc/*.cf-before-edit";
-    "glob11" string => "/usr/local/bin/*.cfsaved";
-    "glob12" string => "/usr/local/bin/*.cf-before-edit";
-    
-    # And filefiles() appears to want a list of strings rather than
-    # an slist.
-    "cruft" slist  => findfiles("$(glob01)","$(glob02)","$(glob03)",
-                                "$(glob04)","$(glob05)","$(glob06)",
-                                "$(glob07)","$(glob08)","$(glob09)",
-                                "$(glob10)","$(glob11)","$(glob12)"
-                               	);
+    "sfiles" slist  => {
+        "/usr/local/etc/bkup-to-s3.env",
+        "/usr/local/etc/bkup-to-s3.list"
+        };
 
 files:
 
-    "$(cruft)"
-    delete  => tidy,
-    classes => if_repaired("a10c_deleted_files");
+    "$(sfiles)"
+    delete => tidy;
 
-commands:
+}
 
-    a10c_deleted_files::
-    "$(gv.log_notice)"
-    args => "Deleted CFE-generated duplicates from various directories";
+bundle agent a10_cfe_rm_cruft
+{
+
+files:
+
+    "/etc/.*\.(cfsaved|cf-before-edit)"
+    delete => tidy;
+
+    "/etc/.*/.*\.(cfsaved|cf-before-edit)"
+    delete => tidy;
+
+    "/usr/local/(etc|bin|sbin)/.*\.(cfsaved|cf-before-edit)"
+    delete => tidy;
+
+}
+
+bundle agent a10_cfe_symlink
+{
+
+files:
+
+    am_policy_hub::
+    "/cfe-master/."
+    link_from         => ln_s("$(sys.masterdir)/services/autorun/."),
+    move_obstructions => "true";
 
 }
