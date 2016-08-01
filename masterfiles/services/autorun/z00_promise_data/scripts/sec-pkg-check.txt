@@ -34,7 +34,7 @@ yum_check_for_security_updates() {
                 return
         elif grep -Eq '[0-9]+ package.*for security' "${_output}" ; then
                 logger							\
-		-p local3.alert						\
+		-p alert						\
 		"${_me}: yum(8) security updates available"
         else
                 logger							\

@@ -30,7 +30,7 @@ errout() {
 	local _msg="${_me} error: ${1}"
 
 	printf '%s\n' "${_msg}"
-	logger -p local3.err "${_msg}"
+	logger -p crit "${_msg}"
 
 	exit 1
 }

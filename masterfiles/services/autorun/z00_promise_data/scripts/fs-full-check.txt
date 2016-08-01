@@ -62,7 +62,7 @@ alert_to_logger() {
 		return
 	fi
 
-	logger -p local3.alert 'ALERT: filesystem(s) getting full'
+	logger -p alert 'ALERT: filesystem(s) getting full'
 }
 
 cleanup() {

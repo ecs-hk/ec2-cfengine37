@@ -35,7 +35,7 @@ files:
 commands:
 
     a09c_default_localconf_installed::
-    "$(gv.log_alert)"
+    "$(gv.log_notice)"
     args => "Installed a default $(gv.localconf_file) configuration";
 
 }
