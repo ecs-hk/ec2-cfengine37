@@ -1,0 +1,43 @@
+###############################################################################
+# Install /etc/profile.d scripts
+###############################################################################
+
+bundle agent a69_profile_d
+{
+
+meta:
+
+    "tags" slist => { "autorun" };
+
+methods:
+
+    gc_agent_ready::
+    "a69profiled" usebundle => a69_profile_d_run;
+
+}
+
+bundle agent a69_profile_d_run
+{
+
+vars:
+
+    "s_dir" string  => "$(gv.scripts)";
+
+    "s_scripts" slist => { "90-profile.d.util-desc" };
+
+files:
+
+    "/etc/profile.d/$(s_scripts).sh"
+    handle          => "a69h_profile_d_scripts",
+    create          => "true",
+    perms           => mog("644","root","root"),
+    copy_from       => local_dcp("$(s_dir)/$(s_scripts).txt"),
+    classes         => if_repaired("a69c_profile_d_fixed");
+
+commands:
+
+    a69c_profile_d_fixed::
+    "$(gv.log_notice)"
+    args => "Installed /etc/profile.d scripts";
+
+}

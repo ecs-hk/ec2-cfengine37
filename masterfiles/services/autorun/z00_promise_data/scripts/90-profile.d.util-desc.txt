@@ -1,0 +1,13 @@
+_p=/usr/local/bin
+
+print_cmd() {
+	if [ -f "${_p}/${1}" ] && [ -x "${_p}/${1}" ] ; then
+		printf '$ %-10s | %s\n'					\
+		"${1}"							\
+		"${2}"
+	fi
+}
+
+print_cmd 'aws-info' 'Print AWS EC2 instance details'
+print_cmd 'json-valid' 'Test and validate JSON file'
+print_cmd 'port-scan' 'Simple TCP scan'
