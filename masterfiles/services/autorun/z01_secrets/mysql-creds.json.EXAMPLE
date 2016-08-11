@@ -1,0 +1,7 @@
+{
+    "host": "db.xyzxyz.us-southwest-88.rds.amazonaws.com",
+    "port": 3306,
+    "database": "CFEdata",
+    "user": "cfewriter",
+    "password": "xx"
+}

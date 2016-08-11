@@ -17,6 +17,7 @@
         "curl", 
         "unzip", 
         "jq", 
-        "bash-completion"
+        "bash-completion",
+        "mysql-connector-python"
     ] 
 }

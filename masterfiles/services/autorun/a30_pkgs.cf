@@ -78,6 +78,9 @@ vars:
     redhat_6::
     "os_specific_pkgs" slist => { "util-linux-ng" };
 
+    redhat_7::
+    "os_specific_pkgs" slist => { @(os_specific_pkgs), "python-simplejson" };
+
 packages:
 
     "$(baseline_pkgs)"

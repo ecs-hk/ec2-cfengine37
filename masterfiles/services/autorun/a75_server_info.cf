@@ -1,0 +1,53 @@
+###############################################################################
+# Install an hourly cronjob to collect and record server info
+###############################################################################
+
+bundle agent a75_server_info
+{
+
+meta:
+
+    "tags" slist => { "autorun" };
+
+methods:
+
+    gc_agent_ready::
+    "a75srvinfo" usebundle => a75_server_info_run;
+
+}
+
+bundle agent a75_server_info_run
+{
+
+vars:
+
+    "s_creds" string  => "$(gv.secrets)/mysql-creds.json";
+    "s_script" string => "$(gv.scripts)/collect-server-info.py.txt";
+
+classes:
+
+    "a75c_creds_ready" expression => fileexists("$(s_creds)");
+
+files:
+
+    a75c_creds_ready::
+    "/usr/local/etc/server-info-creds.json"
+    handle          => "a75h_creds",
+    perms           => mog("600","root","root"),
+    copy_from       => local_dcp("$(s_creds)"),
+    classes         => if_repaired("a75c_srvinfo_cronjob_fixed");
+
+    "/etc/cron.hourly/80-server-info"
+    handle          => "a75h_srvinfo_cronjob",
+    depends_on      => { "a75h_creds" },
+    perms           => mog("755","root","root"),
+    copy_from       => local_dcp("$(s_script)"),
+    classes         => if_repaired("a75c_srvinfo_cronjob_fixed");
+
+commands:
+
+    a75c_srvinfo_cronjob_fixed::
+    "$(gv.log_notice)"
+    args => "Installed cronjob to gather CFE agent info";
+
+}

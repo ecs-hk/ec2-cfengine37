@@ -1,0 +1,202 @@
+#!/usr/bin/python
+
+# Managed by CFEngine
+
+# --------------------------------------------------------------------------- #
+#    GLOBAL IMPORTS
+# --------------------------------------------------------------------------- #
+
+import sys
+import syslog
+import os.path
+import platform
+import commands
+import socket
+import datetime
+import time
+import urllib2
+import multiprocessing
+
+from random import randint
+from time import sleep
+
+pyversion = sys.version.split()[0]
+pyversion = pyversion[0:3]
+
+if pyversion == '2.6' or pyversion == '2.7':
+    import simplejson as json
+else:
+    errout('Unsupported Python version ' + pyversion)
+
+# EL6 EPEL has Python 2.6 dependencies for mysql.connector ::>_<::
+sys.path.append('/usr/lib/python2.6/site-packages')
+import mysql.connector
+
+# --------------------------------------------------------------------------- #
+#    FUNCTIONS
+# --------------------------------------------------------------------------- #
+
+def sleep_a_bit():
+    # Prevent a flurry of hosts hitting the target DB at the same moment
+    sleep(randint(1,180))
+
+def errout(msg):
+    msg = os.path.basename(__file__) + ': ' + msg
+    syslog.syslog(syslog.LOG_CRIT, msg)
+    print '[sent to syslog] ' + msg
+    sys.exit(1)
+
+def write_to_json_file(server_dict):
+    out_json = '/tmp/server-info-output.json'
+    # JSON encoding doesn't do datetime types
+    server_dict['lastUpdated'] = str(server_dict['lastUpdated'])
+    try:
+        f = open(out_json, 'w')
+        json.dump(server_dict, f)
+    except:
+        errout('Unable to write to ' + out_json)
+
+def get_db_connection_parms():
+    in_json = '/usr/local/etc/server-info-creds.json'
+    try:
+        f = open(in_json)
+    except:
+        errout('Unable to open ' + in_json)
+    try:
+        db_conn_parms = json.load(f)
+    except:
+        errout('Unable to parse valid JSON from ' + in_json)
+    return db_conn_parms
+
+def connect_to_db(parms, debug):
+    try:
+        db = mysql.connector.connect(**parms)
+    except mysql.connector.Error as err:
+        if debug:
+            print err
+        return
+    else:
+        return db
+
+def test_db_connection():
+    c = get_db_connection_parms()
+    db = connect_to_db(c, True)
+    if db:
+        db.close()
+        print 'Connection was successful'
+
+def insert_data(db, sdict):
+    q = 'REPLACE INTO ServerInfo (InstID, Hostname, PublicHostname, Uptime, ' + \
+            'LoadAverage, CPUCount, CFEPercent, OS, LastUpdated) ' + \
+            'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)'
+    v = (sdict['instId'], sdict['hostname'], sdict['pubHostname'],
+            sdict['uptime'], sdict['loadAvg'], sdict['cpuCount'],
+            sdict['cfePercent'], sdict['os'], sdict['lastUpdated'])
+    db.cursor().execute(q, v)
+    db.commit()
+
+def write_to_db_table(server_dict):
+    c = get_db_connection_parms()
+    db = connect_to_db(c, False)
+    if db:
+        insert_data(db, server_dict)
+        db.close()
+    else:
+        errout('Cannot connect to DB (try "' + os.path.basename(__file__) +
+                ' test" for more info)')
+
+def get_os_from_python():
+    os = ' '.join(str(i) for i in platform.linux_distribution())
+    return os.strip()
+
+def get_os_from_file():
+    try:
+        f = open('/etc/os-release')
+        d = {}
+        for line in f:
+            k,v = line.split('=')
+            d[k] = v.strip('"\n')
+        return d['PRETTY_NAME']
+    except:
+        return
+
+def get_os():
+    os = get_os_from_python() or get_os_from_file() or 'unknown'
+    return os
+
+def get_amazon_instance_id():
+    uri = 'http://169.254.169.254/latest/meta-data/instance-id'
+    r = urllib2.urlopen(uri)
+    if r.code == 200:
+        return r.read()
+    else:
+        return
+
+def get_uq_hostname():
+    hostname = socket.gethostname()
+    return hostname.split('.')[0]
+
+def get_public_hostname():
+    uri = 'http://169.254.169.254/latest/meta-data/public-hostname'
+    r = urllib2.urlopen(uri)
+    if r.code == 200:
+        return r.read()
+    else:
+        return
+
+def get_cfe_percent():
+    # Grab the last ten promise compliance % entries, and capture the highest
+    # % value we find. We just want to know whether we're getting to 100% at
+    # some point recently. (If none of the ten most recent % values made it to
+    # 100%, then it's chronically out of compliance from our viewpoint.)
+    cmd = 'tail -10 /var/cfengine/promise_summary.log'
+    highest_percent = 0
+    output = commands.getoutput(cmd)
+    for item in output.split():
+        if '%' in item:
+            percent = int(float(item.strip('%,')))
+            if highest_percent < percent:
+                highest_percent = percent
+    return highest_percent
+
+def get_uptime():
+    cmd = 'uptime'
+    output = commands.getoutput(cmd)
+    output = output.split()
+    if ':' in output[2]:
+        return output[2].strip(',')
+    else:
+        return output[2] + ' ' + output[3].strip(',')
+
+def get_load_average():
+    cmd = 'uptime'
+    output = commands.getoutput(cmd)
+    output = output.split()
+    try:
+        return float(output[-1])
+    except:
+        return
+
+# --------------------------------------------------------------------------- #
+#    MAIN LOGIC
+# --------------------------------------------------------------------------- #
+
+def main():
+    d = {}
+    d['os'] = get_os()
+    d['instId'] = get_amazon_instance_id()
+    d['hostname'] = get_uq_hostname()
+    d['pubHostname'] = get_public_hostname()
+    d['cfePercent'] = get_cfe_percent()
+    d['uptime'] = get_uptime()
+    d['loadAvg'] = get_load_average()
+    d['cpuCount'] = multiprocessing.cpu_count()
+    d['lastUpdated'] = datetime.datetime.utcnow()
+    write_to_json_file(d)
+    sleep_a_bit()
+    write_to_db_table(d)
+
+if len(sys.argv) > 1 and sys.argv[1] == 'test':
+    test_db_connection()
+else:
+    main()

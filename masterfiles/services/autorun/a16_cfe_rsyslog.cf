@@ -67,19 +67,11 @@ commands:
 bundle agent a16_cfe_rsyslog_mysql_run
 {
 
-# This bundle enables CFEngine logging to a MySQL DB. It relies on
+# This bundle enables CFEngine logging to a MySQL/MariaDB. It relies on
 # the rsyslog-mysql package, and on the presence of a credentials
 # file. (Note that the credentials file must be created on the
 # CFEngine hub at your site. It is ignored by git, because it would
 # contain private URI and authentication info.
-
-# Example $(s_json) file for an AWS RDS DB:
-#
-# {
-#     "host": "syslogdb.xyzxyz.us-southwest-88.rds.amazonaws.com",
-#     "pw": "goodpassword",
-#     "user": "someguy"
-# }
 
 vars:
 
@@ -87,7 +79,7 @@ vars:
 
     "s_mdir" string  => "$(gv.mustache)";
 
-    "s_json" string => "rsyslog-mysql-creds.json";
+    "s_json" string => "mysql-creds.json";
 
     "s_conf" string => "rsyslog-mysql.conf.mustache";
 
@@ -103,7 +95,7 @@ files:
     "/etc/rsyslog.d/04-mysql.conf"
     handle          => "a16h_rsyslog_mysql_conf",
     create          => "true",
-    perms           => mog("640","root","root"),
+    perms           => mog("600","root","root"),
     edit_template   => "$(s_mdir)/$(s_conf)",
     template_method => "mustache",
     template_data   => readjson("$(s_secdir)/$(s_json)", 50000),
