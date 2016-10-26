@@ -18,17 +18,17 @@ methods:
 
 bundle agent gv
 {
+classes:
+
+  "amzn_linux" expression => classmatch("amzn_.*");
 
 vars:
 
     # Detect and set $(os) variable, which is used to determine whether
     # the promises in this project run at all.
 
-    amzn_2016_03::
-    "os" string => "amzn_2016_03";
-
-    amzn_2015_09::
-    "os" string => "amzn_2015_09";
+    amzn_linux::
+    "os" string => "amzn_linux";
 
     redhat_6::
     "os" string => "redhat_6";
@@ -73,7 +73,7 @@ vars:
     # Set variables for process patterns and service manipulation
     # commands, which will be used by our service management promises.
 
-    amzn_2016_03|amzn_2015_09::
+    amzn_linux::
     "p[crond]" string => "\bcrond\b";
     "p[mta]" string => "\bsendmail.\saccepting\sconnections\b";
     "p[ntpd]" string => "\bntpd\b";

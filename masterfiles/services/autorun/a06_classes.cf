@@ -33,9 +33,7 @@ classes:
 
     "gc_supported_os" expression => not(strcmp("$(gv.os)",""));
 
-    "gc_amzn" or => { "amzn_2016_03", "amzn_2015_09" };
-
-    "gc_el6" or => { "amzn_2016_03", "amzn_2015_09", "redhat_6" };
+    "gc_el6" or => { classmatch("amzn_201[56]_.*"), "redhat_6" };
 
     "gc_el7" or => { "redhat_7" };
 
