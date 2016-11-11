@@ -9,6 +9,7 @@ Baseline cfengine-community-3.7.* promises for managing AWS EC2 instances. Perfo
 
 Supported OSes:
 * Amazon Linux AMI releases 2015.09, 2016.03
+* Debian 8
 * RHEL 6, RHEL 7
 
 
@@ -38,9 +39,12 @@ Next, perform the following steps:
 * Remember to add a rule to your EC2 Security Group to allow in TCP 5308 from your VPC.
 
 
+
 ## Deploy to CFEngine agent
 
-As you launch new EC2 instances, use the following in Configure Instance Details -> Advanced Details -> User Data:
+As you launch new EC2 instances, use the following in Configure Instance Details -> Advanced Details -> User Data.
+
+For EL-based systems (Amazon Linux, RHEL):
 
 ```
 #!/bin/bash
@@ -48,7 +52,16 @@ yum -y install https://s3-us-xyz.amazonaws.com/my.org.packages/cfengine-communit
 /var/cfengine/bin/cf-agent --bootstrap 172.31.15.0
 ```
 
-* Replace the https URI with the URI for a cfengine-community-3.7 package. (Be polite and copy a package to your own S3 bucket, then refer to it in EC2 User Data.)
+For Debian systems:
+
+```
+#!/bin/bash
+wget -O cfe.deb https://s3-us-xyz.amazonaws.com/my.org.packages/cfengine-community_3.7.3-1_amd64.deb
+dpkg -i cfe.deb
+/var/cfengine/bin/cf-agent --bootstrap 172.31.15.0
+```
+
+* Replace the https URI with the URI for a cfengine-community-3.7 package. (Be polite and copy a package to your own `my.org.packages` S3 bucket, then refer to it in EC2 User Data.)
 * Replace 172.31.15.0 with your hub's VPC internal IP address
 
 
@@ -87,6 +100,7 @@ Configurable per-agent (per-EC2 instance) features are managed in the `/usr/loca
 
 Automatic (encrypted) backups can be activated by completing the following steps.
 
+
 ### One-time AWS setup
 
 1. Using AWS S3, create a bucket for backups. Note that [S3 bucket names must be globally-unique](http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html) (across all customer accounts!), so utilize a consistent prefix or suffix to help ensure uniqueness, e.g. `s3://my.org.encbkups/`
@@ -98,6 +112,7 @@ Automatic (encrypted) backups can be activated by completing the following steps
 
 ## Send logs and EC2 instance info to AWS RDS (MariaDB, MySQL)
 
+
 ### DB setup
 
 Run the SQL in this project's `sql` directory. (Update the SQL to use strong service account passwords before running it.)
@@ -107,6 +122,7 @@ $ _host='db.xyzxyz.us-southwest-88.rds.amazonaws.com'
 $ mysql -u root -h "${_host}" -p < sql/setup-dbs.sql 
 $ mysql -u root -h "${_host}" -p < sql/setup-service-accounts.sql 
 ```
+
 
 ### CFEngine configuration
 

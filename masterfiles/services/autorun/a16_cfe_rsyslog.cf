@@ -83,9 +83,15 @@ vars:
 
     "s_conf" string => "rsyslog-mysql.conf.mustache";
 
+    gc_el::
+    "ommysql" string => "/lib64/rsyslog/ommysql.so";
+
+    debian::
+    "ommysql" string => "/usr/lib/rsyslog/ommysql.so";
+
 classes:
 
-    "a16c_pkg_ready" expression => fileexists("/lib64/rsyslog/ommysql.so");
+    "a16c_pkg_ready" expression => fileexists("$(ommysql)");
 
     "a16c_creds_ready" expression => fileexists("$(s_secdir)/$(s_json)");
 
@@ -99,6 +105,13 @@ files:
     edit_template   => "$(s_mdir)/$(s_conf)",
     template_method => "mustache",
     template_data   => readjson("$(s_secdir)/$(s_json)", 50000),
+    classes         => if_repaired("a16c_rsyslog_mysql_fixed");
+
+    # Remove the default config installed by the package.
+
+    "/etc/rsyslog.d/mysql.conf"
+    handle          => "a16h_rsyslog_mysql_rmdef",
+    delete          => tidy,
     classes         => if_repaired("a16c_rsyslog_mysql_fixed");
 
 commands:

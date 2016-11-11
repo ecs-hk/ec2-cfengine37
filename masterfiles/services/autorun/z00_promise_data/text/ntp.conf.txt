@@ -10,8 +10,6 @@ server 1.amazon.pool.ntp.org iburst
 server 2.amazon.pool.ntp.org iburst
 server 3.amazon.pool.ntp.org iburst
 
-includefile /etc/ntp/crypto/pw
-
 logconfig =clockall =peerall =sysall =syncall
 
 interface listen eth0

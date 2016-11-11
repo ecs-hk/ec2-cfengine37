@@ -3,7 +3,7 @@
 # Managed by CFEngine
 
 # This cronjob checks for package security updates and logs a messages
-# if they are available. It excludes kernel and firmware packages.
+# if they are available.
 
 # ------------------------------------------------------------------------- #
 #			VARIABLE DEFINITIONS
@@ -14,19 +14,34 @@ PATH=/bin:/usr/bin
 readonly _me="${0##*/}"
 readonly _output="/tmp/${_me}.log"
 
-readonly _kern_pkgs='kernel* *-kmdl-* kmod-* *firmware*'
-
 # ------------------------------------------------------------------------- #
 #			FUNCTIONS
 # ------------------------------------------------------------------------- #
 
-yum_check_for_security_updates() {
+debian_check_for_security_updates() {
+        unattended-upgrade						\
+	--dry-run
+        >"${_output}" 2>&1
+
+	if [ ${?} -ne 0 ] ; then
+                logger							\
+		-p local3.err						\
+		"${_me}: apt(8) check failed (see ${_output})"
+	fi
+
+        if grep -Eq 'security' "${_output}" ; then
+                logger							\
+		-p alert						\
+		"${_me}: apt(8) security updates available"
+        fi
+}
+
+el_check_for_security_updates() {
         # yum(8) is giving inconsistent results with check-update vs. update,
         # so instead of relying on its sometimes erroneous exit code, we
         # have to grep(1) output.
         yum                                                             \
         --security                                                      \
-        --exclude="${_kern_pkgs}"                                       \
         check-update                                                    \
         >"${_output}" 2>&1
 
@@ -47,6 +62,10 @@ yum_check_for_security_updates() {
 #			MAIN LOGIC
 # ------------------------------------------------------------------------- #
 
-yum_check_for_security_updates
+if [ -e /usr/bin/apt ] ; then
+	debian_check_for_security_updates
+else
+	el_check_for_security_updates
+fi
 
 exit 0

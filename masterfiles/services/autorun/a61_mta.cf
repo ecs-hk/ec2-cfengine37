@@ -11,7 +11,7 @@ meta:
 
 methods:
 
-    gc_agent_ready::
+    gc_agent_ready.gc_el::
     "a61mta" usebundle => a61_mta_run;
 
 }

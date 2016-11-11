@@ -5,7 +5,17 @@ AddressFamily inet
 Protocol 2
 
 LogLevel INFO
+
+
+{{#classes.gc_el}}
 SyslogFacility AUTHPRIV
+{{/classes.gc_el}}
+{{!
+}}
+{{#classes.debian}}
+SyslogFacility AUTH
+{{/classes.debian}}
+
 
 PermitRootLogin without-password
 StrictModes yes
@@ -26,9 +36,7 @@ KerberosAuthentication no
 GSSAPIAuthentication no
 UsePAM yes
 
-# Mustache derived based on global classes - begin ---------------------------
-{{!
-}}
+
 {{#classes.gc_enable_ssh_password_auth}}
 PasswordAuthentication yes
 {{/classes.gc_enable_ssh_password_auth}}
@@ -37,36 +45,21 @@ PasswordAuthentication yes
 {{^classes.gc_enable_ssh_password_auth}}
 PasswordAuthentication no
 {{/classes.gc_enable_ssh_password_auth}}
-{{!
-}}
-# Mustache derived based on global classes - end -----------------------------
 
-# Mustache derived based on OS - begin ---------------------------------------
-{{!
-}}
-{{#classes.gc_amzn}}
+
+{{^classes.redhat_6}}
 UsePrivilegeSeparation sandbox
 HostKey /etc/ssh/ssh_host_rsa_key
 HostKey /etc/ssh/ssh_host_ecdsa_key
 HostKey /etc/ssh/ssh_host_ed25519_key
-{{/classes.gc_amzn}}
-{{!
-}}
-{{#classes.redhat_7}}
-UsePrivilegeSeparation sandbox
-HostKey /etc/ssh/ssh_host_rsa_key
-HostKey /etc/ssh/ssh_host_ecdsa_key
-HostKey /etc/ssh/ssh_host_ed25519_key
-{{/classes.redhat_7}}
+{{/classes.redhat_6}}
 {{!
 }}
 {{#classes.redhat_6}}
 UsePrivilegeSeparation yes
 HostKey /etc/ssh/ssh_host_rsa_key
 {{/classes.redhat_6}}
-{{!
-}}
-# Mustache derived based on OS - end -----------------------------------------
+
 
 Banner /etc/ssh/banner
 PrintMotd yes

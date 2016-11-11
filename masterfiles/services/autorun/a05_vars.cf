@@ -30,6 +30,9 @@ vars:
     amzn_linux::
     "os" string => "amzn_linux";
 
+    debian_8::
+    "os" string => "debian_8";
+
     redhat_6::
     "os" string => "redhat_6";
 
@@ -95,6 +98,26 @@ vars:
     "enable[ntpd]" string => "/sbin/chkconfig ntpd on";
     "enable[rsyslog]" string => "/sbin/chkconfig rsyslog on";
     "enable[sshd]" string => "/sbin/chkconfig sshd on";
+
+    debian_8::
+    "p[crond]" string => "\/cron\b";
+    "p[ntpd]" string => "\bntpd\b";
+    "p[rsyslog]" string => "\/rsyslogd\b";
+    "p[sshd]" string => "\/sshd\b";
+
+    "start[crond]" string => "/bin/systemctl start cron";
+    "start[ntpd]" string => "/bin/systemctl start ntp";
+    "start[rsyslog]" string => "/bin/systemctl start rsyslog";
+    "start[sshd]" string => "/bin/systemctl start ssh";
+
+    "restart[ntpd]" string => "/bin/systemctl restart ntp";
+    "restart[rsyslog]" string => "/bin/systemctl restart rsyslog";
+    "restart[sshd]" string => "/bin/systemctl restart ssh";
+
+    "enable[crond]" string => "/bin/systemctl enable cron";
+    "enable[ntpd]" string => "/bin/systemctl enable ntp";
+    "enable[rsyslog]" string => "/bin/systemctl enable rsyslog";
+    "enable[sshd]" string => "/bin/systemctl enable ssh";
 
     redhat_6::
     "p[crond]" string => "\bcrond\b";

@@ -2,8 +2,7 @@
 
 # Managed by CFEngine
 
-# This cronjob automatically installs security updates, but it excludes
-# kernel and firmware packages.
+# This cronjob automatically installs security updates.
 
 # ------------------------------------------------------------------------- #
 #			VARIABLE DEFINITIONS
@@ -14,20 +13,34 @@ PATH=/bin:/usr/bin
 readonly _me="${0##*/}"
 readonly _output="/tmp/${_me}.log"
 
-readonly _kern_pkgs='kernel* *-kmdl-* kmod-* *firmware*'
-
 # ------------------------------------------------------------------------- #
 #			FUNCTIONS
 # ------------------------------------------------------------------------- #
 
-yum_install_security_updates() {
+debian_install_security_updates() {
+        unattended-upgrade
+        >"${_output}" 2>&1
+
+        if [ ${?} -ne 0 ] ; then
+                logger                                                  \
+                -p local3.err                                           \
+                "${_me}: apt(8) updates failed (see ${_output})"
+        fi
+
+        if grep -Eq 'security' "${_output}" ; then
+                logger                                                  \
+                -p alert                                                \
+                "${_me}: apt(8) installed security updates"
+        fi
+}
+
+el_install_security_updates() {
         # yum(8) is giving inconsistent results with check-update vs. update,
         # so instead of relying on its sometimes erroneous exit code, we
         # have to grep(1) output.
         yum                                                             \
 	-y								\
         --security                                                      \
-        --exclude="${_kern_pkgs}"                                       \
 	update								\
         >"${_output}" 2>&1
 
@@ -49,6 +62,10 @@ yum_install_security_updates() {
 #			MAIN LOGIC
 # ------------------------------------------------------------------------- #
 
-yum_install_security_updates
+if [ -e /usr/bin/apt ] ; then
+        debian_install_security_updates
+else
+        el_install_security_updates
+fi
 
 exit 0

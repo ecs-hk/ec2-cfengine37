@@ -37,6 +37,8 @@ classes:
 
     "gc_el7" or => { "redhat_7" };
 
+    "gc_el" or => { "gc_el6", "gc_el7" };
+
     # Local CFEngine configuration detection.
 
     "gc_localconf_found" expression => fileexists("$(gv.localconf_file)");
