@@ -42,7 +42,6 @@
 	"python-simplejson",
 	"dbus",
 	"util-linux",
-	"awscli",
 	"unattended-upgrades"
     ], 
     "redhat_6": [
