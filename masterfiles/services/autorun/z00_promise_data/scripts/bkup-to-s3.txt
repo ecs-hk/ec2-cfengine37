@@ -80,13 +80,13 @@ audit_encryption_key() {
 }
 
 audit_aws_cli() {
-	aws s3 help >/dev/null 2>&1
-	if [ ${?} -ne 0 ] ; then
-		errout "aws CLI test returned an error"
-	fi
-
 	if [ ! -e "${HOME}/.aws/credentials" ] ; then
 		errout "aws CLI has not been configured yet"
+	fi
+
+	aws s3 ls >/dev/null 2>&1
+	if [ ${?} -ne 0 ] ; then
+		errout "aws s3 CLI test returned an error"
 	fi
 }
 
